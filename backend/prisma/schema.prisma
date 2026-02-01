@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AccessCode {
+  id        Int       @id @default(autoincrement())
+  code      String    @unique
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  contentSet ContentSet?
+}
+
+model ContentSet {
+  id    Int    @id @default(autoincrement())
+  title String
+
+  accessCodeId Int        @unique
+  accessCode   AccessCode @relation(fields: [accessCodeId], references: [id])
+
+  media Media[]
+}
+
+model Media {
+  id     Int         @id @default(autoincrement())
+  title  String
+  type   MediaType
+  source MediaSource
+
+  // For YouTube videos
+  youtubeId String? // e.g. dQw4w9WgXcQ
+
+  // For R2 (audio or video)
+  objectKey String? // e.g. audio/song1.mp3 or video/clip1.mp4
+
+  // Optional metadata
+  duration Int? // seconds
+  order    Int? // ordering in UI
+
+  contentSetId Int
+  contentSet   ContentSet @relation(fields: [contentSetId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+enum MediaType {
+  VIDEO
+  AUDIO
+}
+
+enum MediaSource {
+  YOUTUBE
+  R2
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+}
