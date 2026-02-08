@@ -85,7 +85,7 @@ export default function MediaSection({ initialContent }) {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-8 py-20">
         {/* VIDEOS SECTION */}
-        <section className="mb-32">
+        <section className="mb-32 landscape:mb-8">
           <motion.div
             className="text-center mb-16"
             initial={{ opacity: 0, y: 30 }}
@@ -114,7 +114,7 @@ export default function MediaSection({ initialContent }) {
         </section>
 
         {/* Divider */}
-        <div className="relative h-px my-24">
+        <div className="relative h-px my-24 ">
           <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
           <motion.div
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-pink-500"
@@ -126,9 +126,9 @@ export default function MediaSection({ initialContent }) {
         </div>
 
         {/* AUDIO SECTION */}
-        <section>
+        <section className="landscape:mt-12">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-16 "
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -160,7 +160,7 @@ export default function MediaSection({ initialContent }) {
 
 /* =======================
    VIDEO CARD
-======================= */
+ ======================= */
 
 function VideoCard({ video, index }) {
   // Construct the appropriate URL based on source
@@ -176,32 +176,32 @@ function VideoCard({ video, index }) {
       whileHover={{ y: -8, scale: 1.02 }}
       className="group"
     >
-      <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 hover:border-purple-500/50 hover:shadow-purple-500/20">
+      <div className="relative bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 overflow-hidden transition-all duration-300 hover:border-purple-500/50 hover:shadow-purple-500/20 flex flex-col landscape:flex-row landscape:lg:flex-col">
         {/* Video wrapper */}
-        <div className="relative w-full aspect-video bg-black/50">
-          <CustomVideoPlayer videoUrl={videoUrl} title={video.title} />
+        <div className="relative w-full aspect-video bg-black/50 landscape:w-[65%] landscape:lg:w-full">
+          <CustomVideoPlayer videoUrl={videoUrl} title={video.title} className="w-full h-full" />
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div className="p-6 landscape:w-[35%] landscape:lg:w-full landscape:flex landscape:flex-col landscape:justify-center landscape:p-4">
+          <div className="flex items-center gap-3 mb-3 landscape:mb-1">
+            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center landscape:w-8 landscape:h-8">
+              <svg className="w-5 h-5 text-white landscape:w-4 landscape:h-4" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-white text-xl font-semibold group-hover:text-purple-400 transition truncate">
+              <h3 className="text-white text-xl font-semibold group-hover:text-purple-400 transition truncate landscape:text-base">
                 {video.title}
               </h3>
-              <p className="text-gray-400 text-sm uppercase tracking-wider">Music Video</p>
+              <p className="text-gray-400 text-sm uppercase tracking-wider landscape:text-[10px]">Music Video</p>
             </div>
           </div>
 
           {/* Progress bar decoration */}
-          <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+          <div className="relative h-1 w-full bg-white/5 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+              className="absolute top-0 left-0 h-full bg-linear-to-r from-purple-500 to-pink-500 rounded-full transition-all"
               initial={{ width: '0%' }}
               animate={{ width: '100%' }}
               transition={{ delay: index * 0.2 + 0.5, duration: 1.5, ease: 'easeOut' }}
@@ -218,7 +218,7 @@ function VideoCard({ video, index }) {
 
 /* =======================
    AUDIO CARD
-======================= */
+ ======================= */
 
 function AudioCard({ track, index }) {
   // Use playUrl for R2 content, fallback to url

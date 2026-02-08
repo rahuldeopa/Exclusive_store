@@ -387,17 +387,17 @@ export default function CustomVideoPlayer({ videoUrl, title }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-4 pointer-events-auto"
+                        className="absolute bottom-0 left-0 right-0 z-20 bg-linear-to-t from-black/80 via-black/50 to-transparent p-4 landscape:p-2 pointer-events-auto"
                     >
                         {/* Progress Bar */}
-                        <div className="mb-3">
+                        <div className="mb-3 landscape:mb-1">
                             <div
                                 className="relative w-full h-1 bg-white/20 rounded-full cursor-pointer group/progress"
                                 onClick={handleSeek}
                             >
                                 {/* Progress */}
                                 <div
-                                    className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all"
+                                    className="absolute top-0 left-0 h-full bg-linear-to-r from-purple-500 to-pink-500 rounded-full transition-all"
                                     style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                                 />
                                 {/* Hover effect */}
@@ -409,7 +409,7 @@ export default function CustomVideoPlayer({ videoUrl, title }) {
                                 />
                             </div>
                             {/* Time Display */}
-                            <div className="flex justify-between items-center mt-1 text-xs text-white/70">
+                            <div className="flex justify-between items-center mt-1 text-xs text-white/70 landscape:mt-0 landscape:scale-95">
                                 <span>{formatTime(currentTime)}</span>
                                 <span>{formatTime(duration)}</span>
                             </div>

@@ -37,7 +37,7 @@ export default function Landing() {
             transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
             {/* Header - Dark premium theme */}
-            <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/30 border-b border-white/10 shadow-lg">
+            <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/30 border-b border-white/10 shadow-lg ">
               <motion.div
                 className="max-w-7xl mx-auto px-6 md:px-8 py-5 flex items-center justify-between"
                 initial={{ opacity: 0, y: -20 }}
@@ -83,7 +83,7 @@ export default function Landing() {
             </header>
 
             {/* Hero Section */}
-            <section className="relative w-full py-24 overflow-hidden">
+            <section className="relative w-full py-24 overflow-hidden ">
               {/* Background decorations */}
               <div className="absolute inset-0 opacity-20">
                 <motion.div

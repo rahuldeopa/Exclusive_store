@@ -66,6 +66,18 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
+  /* Mobile Landscape Utilities */
+  @media (max-height: 500px) and (orientation: landscape) {
+    .hide-on-mobile-landscape {
+      display: none !important;
+    }
+    
+    .shrink-on-mobile-landscape {
+      padding-top: 1rem !important;
+      padding-bottom: 1rem !important;
+    }
+  }
 }
 
 ::-webkit-scrollbar {
