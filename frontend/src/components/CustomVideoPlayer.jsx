@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function CustomVideoPlayer({ videoUrl, title }) {
+export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId, seekTrigger }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
@@ -166,6 +166,52 @@ export default function CustomVideoPlayer({ videoUrl, title }) {
         };
     }, [videoId, isYouTube]);
 
+    // Persistence Logic
+    const storageKey = passcode && contentId ? `playback_${passcode}_${contentId}` : null;
+
+    // Load initial time
+    useEffect(() => {
+        if (!isReady || !storageKey) return;
+
+        const savedProgress = localStorage.getItem(storageKey);
+        if (savedProgress) {
+            try {
+                const { time } = JSON.parse(savedProgress);
+                if (time > 0) {
+                    playerAdapter.seekTo(time);
+                    setCurrentTime(time);
+                }
+            } catch (e) {
+                console.error("Error loading video progress", e);
+            }
+        }
+    }, [isReady, storageKey]);
+
+    // Save progress periodically
+    useEffect(() => {
+        if (!storageKey || !isPlaying) return;
+
+        const saveInterval = setInterval(() => {
+            const timeToSave = isYouTube
+                ? (playerRef.current?.getCurrentTime?.() || 0)
+                : (nativeVideoRef.current?.currentTime || 0);
+
+            if (timeToSave > 0) {
+                localStorage.setItem(storageKey, JSON.stringify({ time: timeToSave }));
+            }
+        }, 5000);
+
+        return () => clearInterval(saveInterval);
+    }, [isPlaying, storageKey, isYouTube]);
+
+    // External Seek Trigger
+    useEffect(() => {
+        if (seekTrigger?.time !== undefined && isReady) {
+            playerAdapter.seekTo(seekTrigger.time);
+            setCurrentTime(seekTrigger.time);
+        }
+    }, [seekTrigger, isReady]);
+
     // HTML5 Video Event Listeners
     useEffect(() => {
         if (isYouTube) return;
@@ -215,12 +261,56 @@ export default function CustomVideoPlayer({ videoUrl, title }) {
 
     // Handle fullscreen
     const toggleFullscreen = () => {
-        if (!document.fullscreenElement) {
-            containerRef.current?.requestFullscreen();
-            setIsFullscreen(true);
+        const container = containerRef.current;
+        if (!container) return;
+
+        // Check for native fullscreen support
+        const hasNativeFullscreen =
+            container.requestFullscreen ||
+            container.webkitRequestFullscreen ||
+            container.mozRequestFullScreen ||
+            container.msRequestFullscreen;
+
+        if (!document.fullscreenElement &&
+            !document.webkitFullscreenElement &&
+            !document.mozFullScreenElement &&
+            !document.msFullscreenElement) {
+
+            if (hasNativeFullscreen) {
+                // Try native fullscreen
+                if (container.requestFullscreen) {
+                    container.requestFullscreen();
+                } else if (container.webkitRequestFullscreen) {
+                    container.webkitRequestFullscreen();
+                } else if (container.mozRequestFullScreen) {
+                    container.mozRequestFullScreen();
+                } else if (container.msRequestFullscreen) {
+                    container.msRequestFullscreen();
+                }
+            } else {
+                // Pseudo-fullscreen fallback for iOS
+                container.classList.add('pseudo-fullscreen');
+                document.body.style.overflow = 'hidden'; // Lock scroll
+                setIsFullscreen(true);
+            }
         } else {
-            document.exitFullscreen();
-            setIsFullscreen(false);
+            // Exit native fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.msExitFullscreen) {
+                document.msExitFullscreen();
+            }
+
+            // Cleanup pseudo-fullscreen if active
+            if (container.classList.contains('pseudo-fullscreen')) {
+                container.classList.remove('pseudo-fullscreen');
+                document.body.style.overflow = '';
+                setIsFullscreen(false);
+            }
         }
     };
 
@@ -328,7 +418,13 @@ export default function CustomVideoPlayer({ videoUrl, title }) {
         let scrollPosition = 0;
 
         const handleFullscreenChange = () => {
-            const isNowFullscreen = !!document.fullscreenElement;
+            const isNowFullscreen = !!(
+                document.fullscreenElement ||
+                document.webkitFullscreenElement ||
+                document.mozFullScreenElement ||
+                document.msFullscreenElement
+            );
+
             setIsFullscreen(isNowFullscreen);
 
             // When entering fullscreen, save scroll position
@@ -337,6 +433,10 @@ export default function CustomVideoPlayer({ videoUrl, title }) {
             }
             // When exiting fullscreen, restore scroll position and keep video in view
             else if (containerRef.current) {
+                // Ensure pseudo-fullscreen class is also removed
+                containerRef.current.classList.remove('pseudo-fullscreen');
+                document.body.style.overflow = '';
+
                 // Small delay to ensure DOM has updated
                 setTimeout(() => {
                     // Scroll to the saved position
@@ -347,8 +447,12 @@ export default function CustomVideoPlayer({ videoUrl, title }) {
             }
         };
 
-        document.addEventListener('fullscreenchange', handleFullscreenChange);
-        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+        const events = ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'];
+        events.forEach(event => document.addEventListener(event, handleFullscreenChange));
+
+        return () => {
+            events.forEach(event => document.removeEventListener(event, handleFullscreenChange));
+        };
     }, []);
 
     return (

@@ -18,8 +18,9 @@ model AccessCode {
 }
 
 model ContentSet {
-  id    Int    @id @default(autoincrement())
+  id    Int         @id @default(autoincrement())
   title String
+  type  ContentType @default(MUSIC)
 
   accessCodeId Int        @unique
   accessCode   AccessCode @relation(fields: [accessCodeId], references: [id])
@@ -57,6 +58,12 @@ enum MediaType {
 enum MediaSource {
   YOUTUBE
   R2
+}
+
+enum ContentType {
+  MUSIC
+  AUDIOBOOK
+  SHORT_FILM
 }
 
 model Admin {

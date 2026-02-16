@@ -25,7 +25,7 @@ export default function PasscodeGate({ onUnlock }) {
       }
 
       setPasscode('');
-      onUnlock(result.data?.data?.content);
+      onUnlock(result.data?.data?.content, passcode);
     } catch (err) {
       setError('Unable to connect. Please try again.');
       console.error('Passcode validation error:', err);
@@ -40,7 +40,7 @@ export default function PasscodeGate({ onUnlock }) {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black flex items-center justify-center overflow-hidden">
+    <div className="relative w-full min-h-screen bg-linear-to-br from-purple-900 via-indigo-900 to-black flex items-center justify-center overflow-hidden">
       {/* Animated background elements */}
       <div className="absolute inset-0 opacity-30">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.1),transparent_50%)]"></div>
@@ -48,7 +48,7 @@ export default function PasscodeGate({ onUnlock }) {
 
       {/* Floating vinyl records */}
       <motion.div
-        className="absolute top-20 left-10 w-32 h-32 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-4 border-purple-400/30"
+        className="absolute top-20 left-10 w-32 h-32 rounded-full bg-linear-to-br from-purple-500/20 to-pink-500/20 border-4 border-purple-400/30"
         animate={{
           rotate: 360,
           y: [0, -20, 0],
@@ -64,7 +64,7 @@ export default function PasscodeGate({ onUnlock }) {
       </motion.div>
 
       <motion.div
-        className="absolute bottom-32 right-20 w-40 h-40 rounded-full bg-gradient-to-br from-cyan-500/20 to-blue-500/20 border-4 border-cyan-400/30"
+        className="absolute bottom-32 right-20 w-40 h-40 rounded-full bg-linear-to-br from-cyan-500/20 to-blue-500/20 border-4 border-cyan-400/30"
         animate={{
           rotate: -360,
           y: [0, 15, 0],
@@ -84,7 +84,7 @@ export default function PasscodeGate({ onUnlock }) {
         {[...Array(50)].map((_, i) => (
           <motion.div
             key={i}
-            className="w-1 bg-gradient-to-t from-purple-500 to-pink-500 rounded-t"
+            className="w-1 bg-linear-to-t from-purple-500 to-pink-500 rounded-t"
             animate={{
               height: ['20%', `${Math.random() * 80 + 20}%`, '20%'],
             }}
@@ -107,7 +107,7 @@ export default function PasscodeGate({ onUnlock }) {
       >
         <div className="backdrop-blur-xl bg-white/5 rounded-3xl shadow-2xl border border-white/10 overflow-hidden">
           {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-cyan-500/10 pointer-events-none"></div>
+          <div className="absolute inset-0 bg-linear-to-br from-purple-500/10 via-transparent to-cyan-500/10 pointer-events-none"></div>
 
           <div className="relative px-8 py-12 md:px-12 md:py-16">
             {/* Header with music icon */}
@@ -119,7 +119,7 @@ export default function PasscodeGate({ onUnlock }) {
             >
               {/* Music note icon */}
               <motion.div
-                className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 shadow-lg shadow-purple-500/50"
+                className="inline-flex items-center justify-center w-20 h-20 mb-6 rounded-full bg-linear-to-br from-purple-500 to-pink-500 shadow-lg shadow-purple-500/50"
                 animate={{
                   scale: [1, 1.1, 1],
                   rotate: [0, 5, -5, 0],
@@ -135,7 +135,7 @@ export default function PasscodeGate({ onUnlock }) {
                 </svg>
               </motion.div>
 
-              <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-linear-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
                 Premium Access
               </h1>
               <p className="text-gray-300 text-sm md:text-base uppercase tracking-[0.3em] font-light">
@@ -170,7 +170,7 @@ export default function PasscodeGate({ onUnlock }) {
                     aria-label="Passcode input"
                     className="w-full bg-white/5 border-2 border-white/10 text-white placeholder-gray-500 px-6 py-4 rounded-xl focus:outline-none focus:border-purple-500 focus:bg-white/10 transition-all duration-300 font-mono text-lg tracking-wider"
                   />
-                  <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none"></div>
+                  <div className="absolute inset-0 rounded-xl bg-linear-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none"></div>
                 </div>
               </div>
 
@@ -195,11 +195,11 @@ export default function PasscodeGate({ onUnlock }) {
               <motion.button
                 type="submit"
                 disabled={!passcode || loading}
-                className="relative w-full px-8 py-4 bg-gradient-to-r from-purple-600 via-pink-600 to-cyan-600 hover:from-purple-500 hover:via-pink-500 hover:to-cyan-500 text-white font-bold uppercase tracking-wider transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 overflow-hidden group"
+                className="relative w-full px-8 py-4 bg-linear-to-r from-purple-600 via-pink-600 to-cyan-600 hover:from-purple-500 hover:via-pink-500 hover:to-cyan-500 text-white font-bold uppercase tracking-wider transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed rounded-xl shadow-lg shadow-purple-500/30 hover:shadow-xl hover:shadow-purple-500/50 overflow-hidden group"
                 whileHover={!loading && passcode ? { scale: 1.02 } : {}}
                 whileTap={!loading && passcode ? { scale: 0.98 } : {}}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                <div className="absolute inset-0 bg-linear-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 <span className="relative flex items-center justify-center gap-2">
                   {loading ? (
                     <>
@@ -245,7 +245,7 @@ export default function PasscodeGate({ onUnlock }) {
         </div>
 
         {/* Glow effect */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-purple-600/20 via-pink-600/20 to-cyan-600/20 blur-3xl opacity-60 rounded-3xl"></div>
+        <div className="absolute inset-0 -z-10 bg-linear-to-r from-purple-600/20 via-pink-600/20 to-cyan-600/20 blur-3xl opacity-60 rounded-3xl"></div>
       </motion.div>
     </div>
   );

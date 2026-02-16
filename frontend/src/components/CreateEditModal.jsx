@@ -9,6 +9,7 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
         expiresAt: '',
         content: {
             title: '',
+            type: 'MUSIC',
             media: []
         }
     });
@@ -28,8 +29,10 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
                             type: m.type,
                             source: m.source,
                             title: m.title,
+                            description: m.description || '',
                             url: m.source === 'YOUTUBE' ? `https://youtu.be/${m.youtubeId}` : m.objectKey
-                        })) || []
+                        })) || [],
+                        type: editData.type || 'MUSIC'
                     }
                 });
             } else {
@@ -39,6 +42,7 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
                     expiresAt: '',
                     content: {
                         title: '',
+                        type: 'MUSIC',
                         media: []
                     }
                 });
@@ -52,6 +56,11 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
             setFormData(prev => ({
                 ...prev,
                 content: { ...prev.content, title: value }
+            }));
+        } else if (name === 'type') {
+            setFormData(prev => ({
+                ...prev,
+                content: { ...prev.content, type: value }
             }));
         } else {
             setFormData(prev => ({ ...prev, [name]: value }));
@@ -67,6 +76,7 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
                     type,
                     source: type === 'VIDEO' ? 'YOUTUBE' : 'R2',
                     title: '',
+                    description: '',
                     url: ''
                 }]
             }
@@ -139,6 +149,7 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
             if (editData) {
                 await api.updateContent(editData.id, {
                     title: formData.content.title,
+                    type: formData.content.type,
                     media: formData.content.media.map(m => ({
                         type: m.type,
                         source: m.source,
@@ -149,7 +160,8 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
                         // So I should extract it here in frontend or pass full URL if I update backend.
                         // Let's regex it here for safety.
                         youtubeId: m.source === 'YOUTUBE' ? (m.url.split('v=')[1] || m.url.split('/').pop()) : undefined,
-                        objectKey: m.source === 'R2' ? m.url : undefined
+                        objectKey: m.source === 'R2' ? m.url : undefined,
+                        description: m.description
                     }))
                 });
             } else {
@@ -193,6 +205,21 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
                                 placeholder="e.g. exclusive-workshop-bundle"
                                 required
                             />
+                        </div>
+
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">Experience Type</label>
+                            <select
+                                name="type"
+                                value={formData.content.type}
+                                onChange={handleBasicChange}
+                                className="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none appearance-none"
+                                required
+                            >
+                                <option value="MUSIC">Music (Multiple Videos & Audio)</option>
+                                <option value="AUDIOBOOK">Audiobook (Chapters with optional Video)</option>
+                                <option value="SHORT_FILM">Short Film (Single Cinema Video)</option>
+                            </select>
                         </div>
 
                         {!editData && (
@@ -313,6 +340,18 @@ const CreateEditModal = ({ isOpen, onClose, editData, refreshData }) => {
                                                         </div>
                                                     </div>
                                                 )}
+                                            </div>
+
+                                            <div className="md:col-span-2">
+                                                <label className="block text-[10px] font-medium text-gray-500 uppercase mb-1">
+                                                    {formData.content.type === 'AUDIOBOOK' ? 'Chapters / Timestamps' : 'Description'}
+                                                </label>
+                                                <textarea
+                                                    value={item.description}
+                                                    onChange={(e) => updateMedia(idx, 'description', e.target.value)}
+                                                    className="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:border-indigo-500 outline-none h-20 resize-none font-mono"
+                                                    placeholder={formData.content.type === 'AUDIOBOOK' ? "00:00 Intro\n05:20 Chapter 1..." : "Optional description..."}
+                                                />
                                             </div>
                                         </div>
                                     </div>

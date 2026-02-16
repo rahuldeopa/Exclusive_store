@@ -68,13 +68,17 @@ export async function verifyPasscodeService(passcode: string) {
   return {
     valid: true,
     content: {
+      id: accessCode.contentSet.id,
       title: accessCode.contentSet.title,
+      type: accessCode.contentSet.type,
       media: transformedMedia.filter(Boolean),
     },
   };
 }
 
 export async function loginAdminService(password: string, username: string) {
+  const hash = await bcrypt.hash("admin123", 10);
+console.log(hash);
   const admin = await prisma.admin.findUnique({
     where: { username },
   });

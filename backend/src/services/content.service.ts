@@ -7,6 +7,7 @@ type CreateContentInput = {
   expiresAt?: string;
   content: {
     title: string;
+    type: 'MUSIC' | 'AUDIOBOOK' | 'SHORT_FILM';
     media: {
       type: 'VIDEO' | 'AUDIO';
       source: 'YOUTUBE' | 'R2';
@@ -30,6 +31,7 @@ export async function createContentSetService(input: CreateContentInput) {
     const contentSet = await tx.contentSet.create({
       data: {
         title: input.content.title,
+        type: input.content.type,
         accessCodeId: accessCode.id,
       },
     });
@@ -46,6 +48,7 @@ export async function createContentSetService(input: CreateContentInput) {
           type: MediaType.VIDEO,
           source: MediaSource.YOUTUBE,
           title: item.title,
+          description: (item as any).description,
           youtubeId: videoId,
           contentSetId: contentSet.id,
         };
@@ -58,6 +61,7 @@ export async function createContentSetService(input: CreateContentInput) {
           type: item.type === 'VIDEO' ? MediaType.VIDEO : MediaType.AUDIO,
           source: MediaSource.R2,
           title: item.title,
+          description: (item as any).description,
           objectKey: item.url,
           contentSetId: contentSet.id,
         };

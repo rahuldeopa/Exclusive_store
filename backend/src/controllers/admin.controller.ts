@@ -87,14 +87,14 @@ export const deleteContent = async (req: Request, res: Response) => {
 // Update is complex, let's allow updating Title and Media
 export const updateContent = async (req: Request, res: Response) => {
     try {
-        const { id } = req.params;
-        const { title, media } = req.body; 
+    const { id } = req.params;
+    const { title, type, media } = req.body; 
 
         await prisma.$transaction(async (tx) => {
-            // Update Title
+            // Update Title and Type
             await tx.contentSet.update({
                 where: { id: Number(id) },
-                data: { title }
+                data: { title, type }
             });
 
             // Handle file cleanup for removed media
@@ -138,6 +138,7 @@ export const updateContent = async (req: Request, res: Response) => {
                     type: item.type as MediaType,
                     source: item.source as MediaSource,
                     title: item.title,
+                    description: item.description,
                     youtubeId: item.youtubeId,
                     objectKey: item.objectKey,
                     contentSetId: Number(id)

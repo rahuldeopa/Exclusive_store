@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
  * CustomAudioPlayer Component
  * Premium audio player with dark, music-focused aesthetic
  */
-export default function CustomAudioPlayer({ src, title }) {
+export default function CustomAudioPlayer({ src, title, passcode, contentId, chapterIndex, seekTrigger }) {
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -13,6 +13,58 @@ export default function CustomAudioPlayer({ src, title }) {
   const [isSeeking, setIsSeeking] = useState(false);
   const [volume, setVolume] = useState(1);
   const [showVolume, setShowVolume] = useState(false);
+
+  // Persistence Logic
+  const storageKey = passcode && contentId ? `playback_${passcode}_${contentId}` : null;
+
+  // Load initial time
+  useEffect(() => {
+    if (storageKey) {
+      const savedProgress = localStorage.getItem(storageKey);
+      if (savedProgress) {
+        try {
+          const { chapterIndex: savedChapter, time } = JSON.parse(savedProgress);
+          // For audiobooks, only restore if the chapter matches
+          if (chapterIndex !== undefined) {
+            if (savedChapter === chapterIndex && time > 0) {
+              if (audioRef.current) audioRef.current.currentTime = time;
+              setCurrentTime(time);
+            }
+          } else if (time > 0) {
+            if (audioRef.current) audioRef.current.currentTime = time;
+            setCurrentTime(time);
+          }
+        } catch (e) {
+          console.error("Error loading progress", e);
+        }
+      }
+    }
+  }, [storageKey, chapterIndex, src]);
+
+  // Save progress periodically
+  useEffect(() => {
+    if (!storageKey || !isPlaying) return;
+
+    const saveInterval = setInterval(() => {
+      if (audioRef.current) {
+        const progress = {
+          time: audioRef.current.currentTime,
+          chapterIndex: chapterIndex // undefined for single audio
+        };
+        localStorage.setItem(storageKey, JSON.stringify(progress));
+      }
+    }, 5000); // Save every 5 seconds
+
+    return () => clearInterval(saveInterval);
+  }, [isPlaying, storageKey, chapterIndex]);
+
+  // External Seek Trigger
+  useEffect(() => {
+    if (seekTrigger?.time !== undefined) {
+      if (audioRef.current) audioRef.current.currentTime = seekTrigger.time;
+      setCurrentTime(seekTrigger.time);
+    }
+  }, [seekTrigger]);
 
   // Update current time as audio plays
   useEffect(() => {
@@ -31,6 +83,7 @@ export default function CustomAudioPlayer({ src, title }) {
 
     const handleEnded = () => {
       setIsPlaying(false);
+      // Optional: clear progress on end? Or not.
     };
 
     audio.addEventListener('timeupdate', updateTime);
@@ -101,13 +154,13 @@ export default function CustomAudioPlayer({ src, title }) {
 
       {/* Player Container */}
       <motion.div
-        className="relative backdrop-blur-xl bg-gradient-to-br from-white/5 to-white/10 border border-white/20 rounded-2xl p-5 overflow-hidden group hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-500"
+        className="relative backdrop-blur-xl bg-linear-to-br from-white/5 to-white/10 border border-white/20 rounded-2xl p-5 overflow-hidden group hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-500"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Animated gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-cyan-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
 
         {/* Pulsing glow effects */}
         <motion.div
@@ -141,7 +194,7 @@ export default function CustomAudioPlayer({ src, title }) {
           <div className="flex items-start gap-4">
             {/* Play/Pause Button */}
             <motion.button
-              className="relative flex items-center justify-center w-16 h-16 rounded-2xl shrink-0 bg-gradient-to-br from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-400 hover:via-purple-400 hover:to-pink-400 shadow-xl shadow-cyan-500/30 group/btn overflow-hidden"
+              className="relative flex items-center justify-center w-16 h-16 rounded-2xl shrink-0 bg-linear-to-br from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-400 hover:via-purple-400 hover:to-pink-400 shadow-xl shadow-cyan-500/30 group/btn overflow-hidden"
               onClick={handlePlayPause}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -149,7 +202,7 @@ export default function CustomAudioPlayer({ src, title }) {
             >
               {/* Shimmer effect */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent"
                 animate={{
                   x: ['-100%', '200%'],
                 }}
@@ -287,7 +340,7 @@ export default function CustomAudioPlayer({ src, title }) {
               />
 
               {/* Background track */}
-              <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 rounded-full"></div>
+              <div className="absolute inset-0 bg-linear-to-r from-white/5 to-white/10 rounded-full"></div>
 
               {/* Progress fill with gradient */}
               <motion.div
