@@ -180,6 +180,11 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                 if (time > 0) {
                     playerAdapter.seekTo(time);
                     setCurrentTime(time);
+                    // Ensure video stays paused after seeking to saved position
+                    setTimeout(() => {
+                        playerAdapter.pauseVideo();
+                        setIsPlaying(false);
+                    }, 300);
                 }
             } catch (e) {
                 console.error("Error loading video progress", e);

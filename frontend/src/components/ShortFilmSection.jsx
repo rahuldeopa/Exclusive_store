@@ -24,7 +24,7 @@ export default function ShortFilmSection({ initialContent, passcode }) {
     };
 
     return (
-        <div className="w-full min-h-screen bg-[#050505] text-white selection:bg-purple-500/30 font-sans">
+        <div className="w-full min-h-screen bg-[#050505] text-white selection:bg-purple-500/30 font-sans overflow-x-hidden">
             {/* Immersive Cinematic Background */}
             <div className="fixed inset-0 pointer-events-none -z-10">
                 <div className="absolute top-0 right-0 w-[70vw] h-[70vw] bg-purple-900/10 rounded-full blur-[180px] animate-pulse" />
@@ -33,12 +33,12 @@ export default function ShortFilmSection({ initialContent, passcode }) {
             </div>
 
             {/* Poster Hero Experience */}
-            <main className="relative min-h-screen flex flex-col items-center justify-center px-6 py-20 overflow-hidden">
+            <main className="relative min-h-screen flex flex-col items-center justify-center px-3 sm:px-4 md:px-6 py-10 sm:py-14 md:py-20 overflow-hidden">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="relative z-10 w-full max-w-6xl aspect-21/9 md:aspect-21/7 rounded-4xl overflow-hidden group shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border border-white/5"
+                    className="relative z-10 w-full max-w-6xl aspect-4/3 sm:aspect-video md:aspect-21/9 lg:aspect-21/7 rounded-2xl sm:rounded-3xl md:rounded-4xl overflow-hidden group shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] sm:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border border-white/5"
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                 >
@@ -53,50 +53,51 @@ export default function ShortFilmSection({ initialContent, passcode }) {
                     <div className="absolute inset-0 bg-linear-to-r from-black via-transparent to-transparent opacity-80" />
 
                     {/* Content Overlay */}
-                    <div className="absolute inset-0 p-8 md:p-16 flex flex-col justify-end">
+                    <div className="absolute inset-0 p-4 sm:p-6 md:p-10 lg:p-16 flex flex-col justify-end">
                         <motion.div
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.5, duration: 0.8 }}
-                            className="max-w-3xl space-y-6"
+                            className="max-w-3xl space-y-3 sm:space-y-4 md:space-y-6"
                         >
-                            <div className="flex flex-wrap items-center gap-4">
-                                <span className="px-3 py-1 bg-white/10 backdrop-blur-md rounded-md text-[10px] font-black uppercase tracking-widest border border-white/10">4K ULTRA HD</span>
-                                <span className="flex items-center gap-1.5 px-3 py-1 bg-yellow-500/10 backdrop-blur-md rounded-md text-[10px] font-black uppercase tracking-widest border border-yellow-500/20 text-yellow-500">
-                                    <Star className="w-3 h-3 fill-current" /> Premium Exclusive
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
+                                <span className="px-2 py-0.5 sm:px-3 sm:py-1 bg-white/10 backdrop-blur-md rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest border border-white/10">4K ULTRA HD</span>
+                                <span className="flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-3 sm:py-1 bg-yellow-500/10 backdrop-blur-md rounded-md text-[8px] sm:text-[10px] font-black uppercase tracking-widest border border-yellow-500/20 text-yellow-500">
+                                    <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-current" /> Premium Exclusive
                                 </span>
                             </div>
 
-                            <h1 className="text-2xl md:text-5xl font-black italic uppercase tracking-tighter leading-[1.2] text-white drop-shadow-2xl pt-6">
+                            <h1 className="text-lg sm:text-xl md:text-3xl lg:text-5xl font-black italic uppercase tracking-tighter leading-[1.2] text-white drop-shadow-2xl pt-2 sm:pt-4 md:pt-6">
                                 {videoMedia.title}
                             </h1>
 
-                            <p className="text-white/60 text-base md:text-lg max-w-2xl font-light leading-relaxed line-clamp-2 md:line-clamp-3">
+                            <p className="text-white/60 text-xs sm:text-sm md:text-base lg:text-lg max-w-2xl font-light leading-relaxed line-clamp-2 md:line-clamp-3">
                                 {videoMedia.description || "An extraordinary cinematic journey that pushes the boundaries of storytelling. Witness a masterpiece of visual poetry, exclusively available in this premium collection."}
                             </p>
 
-                            <div className="flex flex-wrap items-center gap-4 pt-4">
+                            <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4 pt-2 sm:pt-3 md:pt-4">
                                 <button
                                     onClick={() => setShowPlayer(true)}
-                                    className="group/btn px-10 py-5 bg-white text-black rounded-2xl font-black uppercase text-xs tracking-[0.2em] shadow-2xl hover:bg-indigo-500 hover:text-white transition-all transform hover:scale-105 flex items-center gap-3 active:scale-95"
+                                    className="group/btn px-5 py-2.5 sm:px-7 sm:py-3 md:px-10 md:py-5 bg-white text-black rounded-xl sm:rounded-2xl font-black uppercase text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.2em] shadow-2xl hover:bg-indigo-500 hover:text-white transition-all transform hover:scale-105 flex items-center gap-2 sm:gap-3 active:scale-95"
                                 >
-                                    <Play className="w-5 h-5 fill-current" />
+                                    <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
                                     Watch Film
                                 </button>
 
                                 <button
                                     onClick={togglePlaylist}
-                                    className={`px-8 py-5 backdrop-blur-xl rounded-2xl font-black uppercase text-xs tracking-[0.2em] border transition-all flex items-center gap-3 active:scale-95 ${isInPlaylist
+                                    className={`px-4 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-5 backdrop-blur-xl rounded-xl sm:rounded-2xl font-black uppercase text-[10px] sm:text-xs tracking-[0.15em] sm:tracking-[0.2em] border transition-all flex items-center gap-2 sm:gap-3 active:scale-95 ${isInPlaylist
                                         ? 'bg-green-500/20 border-green-500/50 text-green-400'
                                         : 'bg-white/5 border-white/10 text-white hover:bg-white/10 hover:border-white/20'
                                         }`}
                                 >
-                                    {isInPlaylist ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-                                    {isInPlaylist ? 'In Playlist' : 'Add to Playlist'}
+                                    {isInPlaylist ? <Check className="w-4 h-4 sm:w-5 sm:h-5" /> : <Plus className="w-4 h-4 sm:w-5 sm:h-5" />}
+                                    <span className="hidden sm:inline">{isInPlaylist ? 'In Playlist' : 'Add to Playlist'}</span>
+                                    <span className="sm:hidden">{isInPlaylist ? 'Added' : 'Add'}</span>
                                 </button>
 
-                                <button className="p-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl text-white hover:bg-white/10 transition-all active:scale-95">
-                                    <Share2 className="w-5 h-5" />
+                                <button className="p-2.5 sm:p-3 md:p-5 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl text-white hover:bg-white/10 transition-all active:scale-95">
+                                    <Share2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                             </div>
                         </motion.div>
@@ -116,16 +117,16 @@ export default function ShortFilmSection({ initialContent, passcode }) {
                 </motion.div>
 
                 {/* Additional Info Cards */}
-                <div className="w-full max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
-                    <div className="p-8 rounded-4xl bg-white/2 border border-white/5 backdrop-blur-3xl space-y-4">
-                        <Clock className="w-6 h-6 text-indigo-400" />
-                        <h3 className="text-sm font-black uppercase tracking-widest">Duration</h3>
-                        <p className="text-2xl font-bold">12:45 <span className="text-sm text-white/40 font-normal">MIN</span></p>
+                <div className="w-full max-w-6xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mt-6 sm:mt-8 md:mt-12">
+                    <div className="p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-4xl bg-white/2 border border-white/5 backdrop-blur-3xl space-y-2 sm:space-y-4">
+                        <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
+                        <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest">Duration</h3>
+                        <p className="text-xl sm:text-2xl font-bold">12:45 <span className="text-xs sm:text-sm text-white/40 font-normal">MIN</span></p>
                     </div>
-                    <div className="p-8 rounded-4xl bg-white/2 border border-white/5 backdrop-blur-3xl space-y-4 md:col-span-2">
-                        <Info className="w-6 h-6 text-purple-400" />
-                        <h3 className="text-sm font-black uppercase tracking-widest">About the Film</h3>
-                        <p className="text-white/60 text-sm leading-relaxed">
+                    <div className="p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl md:rounded-4xl bg-white/2 border border-white/5 backdrop-blur-3xl space-y-2 sm:space-y-4 sm:col-span-1 md:col-span-2">
+                        <Info className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />
+                        <h3 className="text-xs sm:text-sm font-black uppercase tracking-widest">About the Film</h3>
+                        <p className="text-white/60 text-xs sm:text-sm leading-relaxed">
                             Captured using high-end anamorphic lenses, this production explores the delicate balance between reality and perception. A must-watch for cinephiles who appreciate atmospheric cinematography and deep narrative layers.
                         </p>
                     </div>
@@ -139,26 +140,27 @@ export default function ShortFilmSection({ initialContent, passcode }) {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-100 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4 md:p-8"
+                        className="fixed inset-0 z-100 bg-black/95 backdrop-blur-2xl flex items-center justify-center p-1 sm:p-2 md:p-4 lg:p-8"
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 1.05, opacity: 0, y: -20 }}
                             transition={{ type: "spring", damping: 30, stiffness: 200 }}
-                            className="relative w-full max-w-7xl aspect-video bg-black rounded-4xl overflow-hidden shadow-[0_0_100px_rgba(99,102,241,0.2)]"
+                            className="relative w-full max-w-7xl aspect-video bg-black rounded-xl sm:rounded-2xl md:rounded-3xl lg:rounded-4xl overflow-hidden shadow-[0_0_100px_rgba(99,102,241,0.2)]"
                         >
                             {/* Modal Header/Top Bar */}
-                            <div className="absolute top-0 inset-x-0 p-6 flex items-center justify-between z-50 pointer-events-none bg-linear-to-b from-black/80 to-transparent">
+                            <div className="absolute top-0 inset-x-0 p-3 sm:p-4 md:p-6 flex items-center justify-between z-50 pointer-events-none bg-linear-to-b from-black/80 to-transparent">
                                 <div>
-                                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40 mb-1 block">Now Playing Cinema</span>
-                                    <h2 className="text-xl font-bold tracking-tight">{videoMedia.title}</h2>
+                                    <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/40 mb-0.5 sm:mb-1 block">Now Playing Cinema</span>
+                                    <h2 className="text-sm sm:text-base md:text-xl font-bold tracking-tight truncate max-w-[200px] sm:max-w-none">{videoMedia.title}</h2>
                                 </div>
                                 <button
                                     onClick={() => setShowPlayer(false)}
-                                    className="p-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full text-white pointer-events-auto transition-all transform hover:rotate-90 active:scale-90"
+                                    className="p-2 sm:p-3 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-full text-white pointer-events-auto transition-all transform hover:rotate-90 active:scale-90"
                                 >
-                                    <X size={24} />
+                                    <X size={20} className="sm:hidden" />
+                                    <X size={24} className="hidden sm:block" />
                                 </button>
                             </div>
 
@@ -184,16 +186,16 @@ export default function ShortFilmSection({ initialContent, passcode }) {
             </AnimatePresence>
 
             {/* Bottom Credits Decor */}
-            <footer className="w-full py-20 px-8 flex justify-center opacity-20 hover:opacity-100 transition-opacity duration-700">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.5em]">
+            <footer className="w-full py-8 px-4 sm:py-12 sm:px-6 md:py-20 md:px-8 flex justify-center opacity-20 hover:opacity-100 transition-opacity duration-700">
+                <div className="flex flex-col items-center gap-3 sm:gap-4">
+                    <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-4 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.3em] sm:tracking-[0.5em]">
                         <span>Direction</span>
                         <div className="w-1 h-1 rounded-full bg-white" />
                         <span>Cinematography</span>
                         <div className="w-1 h-1 rounded-full bg-white" />
                         <span>Sound</span>
                     </div>
-                    <p className="text-[10px] uppercase font-bold tracking-widest text-center">Exclusive Production © 2026</p>
+                    <p className="text-[8px] sm:text-[10px] uppercase font-bold tracking-widest text-center">Exclusive Production © 2026</p>
                 </div>
             </footer>
         </div>

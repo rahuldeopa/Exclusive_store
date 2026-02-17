@@ -92,37 +92,37 @@ export default function AudiobookSection({ initialContent, passcode }) {
     };
 
     return (
-        <div className="w-full min-h-screen bg-[#0a0a0a] text-white selection:bg-indigo-500/30">
+        <div className="w-full min-h-screen bg-[#0a0a0a] text-white selection:bg-indigo-500/30 overflow-x-hidden">
             {/* Immersive Background Decor */}
             <div className="fixed inset-0 pointer-events-none -z-10">
                 <div className="absolute top-0 left-0 w-[50vw] h-[50vw] bg-indigo-600/10 rounded-full blur-[120px]" />
                 <div className="absolute bottom-0 right-0 w-[40vw] h-[40vw] bg-purple-600/10 rounded-full blur-[120px]" />
             </div>
 
-            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 py-24 px-6 md:px-12">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 py-6 px-4 sm:px-6 md:px-8 lg:py-24 lg:px-12 landscape-audiobook-grid">
 
                 {/* Left Side: Chapter List */}
-                <div className="lg:col-span-4 space-y-6">
-                    <div className="flex items-center gap-3 mb-8">
-                        <div className="p-3 bg-indigo-500/20 rounded-2xl border border-indigo-500/30">
-                            <BookOpen className="w-6 h-6 text-indigo-400" />
+                <div className="lg:col-span-4 space-y-4 sm:space-y-6">
+                    <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 lg:mb-8">
+                        <div className="p-2 sm:p-3 bg-indigo-500/20 rounded-xl sm:rounded-2xl border border-indigo-500/30">
+                            <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400" />
                         </div>
-                        <h2 className="text-2xl font-bold text-white tracking-tight">Chapters</h2>
+                        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-white tracking-tight">Chapters</h2>
                     </div>
 
-                    <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-2 sm:space-y-3 max-h-[35vh] sm:max-h-[40vh] lg:max-h-[60vh] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
                         {parsedChapters.map((chapter, index) => (
                             <motion.button
                                 key={index}
                                 onClick={() => handleChapterClick(index, chapter)}
-                                className={`w-full text-left p-4 rounded-2xl border transition-all duration-300 flex items-center gap-4 group ${currentChapterIndex === index
+                                className={`w-full text-left p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 flex items-center gap-3 sm:gap-4 group ${currentChapterIndex === index
                                     ? 'bg-indigo-500/20 border-indigo-500/50 shadow-lg shadow-indigo-500/10'
                                     : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10'
                                     }`}
                                 whileHover={{ x: 4 }}
                                 whileTap={{ scale: 0.98 }}
                             >
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold tracking-tight transition-colors ${currentChapterIndex === index ? 'bg-indigo-500 text-white' : 'bg-white/10 text-gray-400 group-hover:bg-white/20'
+                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-base font-bold tracking-tight transition-colors shrink-0 ${currentChapterIndex === index ? 'bg-indigo-500 text-white' : 'bg-white/10 text-gray-400 group-hover:bg-white/20'
                                     }`}>
                                     {index + 1}
                                 </div>
@@ -156,7 +156,7 @@ export default function AudiobookSection({ initialContent, passcode }) {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -20 }}
                             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                            className="bg-white/2 backdrop-blur-3xl border border-white/5 rounded-4xl p-8 md:p-16 shadow-2xl relative overflow-hidden h-full flex flex-col justify-center min-h-[600px]"
+                            className="bg-white/2 backdrop-blur-3xl border border-white/5 rounded-2xl sm:rounded-3xl lg:rounded-4xl p-4 sm:p-6 md:p-10 lg:p-16 shadow-2xl relative overflow-hidden h-full flex flex-col justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[600px]"
                         >
                             {/* Animated pattern background */}
                             <div className="absolute inset-0 opacity-5 pointer-events-none">
@@ -168,7 +168,7 @@ export default function AudiobookSection({ initialContent, passcode }) {
                                     <motion.span
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="inline-block px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-bold uppercase tracking-[0.2em]"
+                                        className="inline-block px-3 py-1 sm:px-4 sm:py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em]"
                                     >
                                         Now Playing • Chapter {currentChapterIndex + 1}
                                     </motion.span>
@@ -176,14 +176,14 @@ export default function AudiobookSection({ initialContent, passcode }) {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.1 }}
-                                        className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight"
+                                        className="text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-tight"
                                     >
                                         {parsedChapters[currentChapterIndex]?.title}
                                     </motion.h3>
                                 </div>
 
                                 {/* Player Logic */}
-                                <div className="py-8 flex-1 flex flex-col justify-center">
+                                <div className="py-4 sm:py-6 lg:py-8 flex-1 flex flex-col justify-center">
                                     {mainMedia?.source === 'YOUTUBE' ? (
                                         <div className="rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/10 aspect-video bg-black transform transition-transform duration-700 hover:scale-[1.01]">
                                             <CustomVideoPlayer
@@ -209,19 +209,19 @@ export default function AudiobookSection({ initialContent, passcode }) {
                                 </div>
 
                                 {/* Navigation */}
-                                <div className="flex items-center justify-between pt-8 border-t border-white/5">
+                                <div className="flex items-center justify-between pt-4 sm:pt-6 lg:pt-8 border-t border-white/5">
                                     <button
                                         disabled={currentChapterIndex === 0}
                                         onClick={prevChapter}
                                         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed group"
                                     >
                                         <ChevronRight className="w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform" />
-                                        <span className="font-bold uppercase tracking-widest text-sm">Previous</span>
+                                        <span className="font-bold uppercase tracking-wider sm:tracking-widest text-xs sm:text-sm">Previous</span>
                                     </button>
 
-                                    <div className="flex gap-1.5">
+                                    <div className="flex gap-1 sm:gap-1.5 max-w-[120px] sm:max-w-none overflow-hidden">
                                         {parsedChapters.map((_, i) => (
-                                            <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === currentChapterIndex ? 'w-6 bg-indigo-500' : 'bg-white/10'}`}></div>
+                                            <div key={i} className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all duration-300 shrink-0 ${i === currentChapterIndex ? 'w-4 sm:w-6 bg-indigo-500' : 'bg-white/10'}`}></div>
                                         ))}
                                     </div>
 
@@ -230,7 +230,7 @@ export default function AudiobookSection({ initialContent, passcode }) {
                                         onClick={nextChapter}
                                         className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed group"
                                     >
-                                        <span className="font-bold uppercase tracking-widest text-sm">Next</span>
+                                        <span className="font-bold uppercase tracking-wider sm:tracking-widest text-xs sm:text-sm">Next</span>
                                         <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                     </button>
                                 </div>
