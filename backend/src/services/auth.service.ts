@@ -50,15 +50,20 @@ export async function verifyPasscodeService(passcode: string) {
 
       // R2 audio / video
       if (media.source === 'R2') {
-        const signedUrl = await getSignedMediaUrl(media.objectKey!);
+        try {
+          const signedUrl = await getSignedMediaUrl(media.objectKey!);
 
-        return {
-          id: media.id,
-          type: media.type,
-          title: media.title,
-          source: 'R2',
-          playUrl: signedUrl,
-        };
+          return {
+            id: media.id,
+            type: media.type,
+            title: media.title,
+            source: 'R2',
+            playUrl: signedUrl,
+          };
+        } catch (error) {
+          console.error(`Failed to get signed URL for media ID ${media.id} (key: ${media.objectKey}):`, error);
+          return null; // Skip this media if the file fails to generate a signed URL
+        }
       }
 
       return null;

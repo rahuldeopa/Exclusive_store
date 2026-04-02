@@ -53,17 +53,20 @@ model Media {
 enum MediaType {
   VIDEO
   AUDIO
+  DOCUMENT
 }
 
 enum MediaSource {
   YOUTUBE
   R2
+  SOUNDCLOUD
 }
 
 enum ContentType {
   MUSIC
   AUDIOBOOK
   SHORT_FILM
+  DIGITAL_BOOK
 }
 
 model Admin {

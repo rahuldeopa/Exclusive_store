@@ -4,6 +4,7 @@ import PasscodeGate from '../components/PasscodeGate';
 import MediaSection from '../components/MediaSection';
 import AudiobookSection from '../components/AudiobookSection';
 import ShortFilmSection from '../components/ShortFilmSection';
+import DigitalBookViewer from '../components/DigitalBook/DigitalBookViewer';
 
 /**
  * Landing Page
@@ -35,23 +36,23 @@ export default function Landing() {
         ) : (
           <motion.div
             key="content"
-            className="w-full min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-black"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="w-full min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-500"
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            {/* Header - Dark premium theme */}
-            <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-black/30 border-b border-white/10 shadow-lg ">
+            {/* Header - Light premium theme */}
+            <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-500">
               <motion.div
                 className="max-w-7xl mx-auto px-6 md:px-8 py-5 flex items-center justify-between"
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
                 transition={{ delay: 0.3, duration: 0.6 }}
               >
                 {/* Logo/Brand */}
                 <div className="flex items-center gap-4">
                   <motion.div
-                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/50"
+                    className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20"
                     animate={{ rotate: [0, 5, -5, 0] }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                   >
@@ -60,16 +61,16 @@ export default function Landing() {
                     </svg>
                   </motion.div>
                   <div>
-                    <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
                       Premium Collection
                     </h1>
-                    <p className="text-gray-400 text-xs uppercase tracking-wider">Limited Edition</p>
+                    <p className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-[0.15em] font-medium">Limited Edition</p>
                   </div>
                 </div>
 
                 {/* Lock Button */}
                 <motion.button
-                  className="group px-5 py-2.5 bg-white/5 border border-white/10 hover:border-purple-500/50 hover:bg-white/10 text-gray-300 hover:text-white transition-all duration-300 uppercase text-sm tracking-wider font-medium rounded-xl backdrop-blur-sm flex items-center gap-2"
+                  className="group px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 uppercase text-xs tracking-widest font-semibold rounded-xl flex items-center gap-2 shadow-sm"
                   onClick={() => setIsUnlocked(false)}
                   title="Re-lock content"
                   initial={{ opacity: 0, x: 20 }}
@@ -90,14 +91,14 @@ export default function Landing() {
             {mediaContent?.type === 'MUSIC' && (
               <section className="relative w-full py-24 overflow-hidden ">
                 {/* Background decorations */}
-                <div className="absolute inset-0 opacity-20">
+                <div className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none">
                   <motion.div
-                    className="absolute top-20 left-10 w-72 h-72 bg-purple-600 rounded-full blur-3xl"
+                    className="absolute top-20 left-10 w-80 h-80 bg-blue-300 dark:bg-blue-600 rounded-full blur-3xl"
                     animate={{ y: [0, -30, 0], x: [0, 20, 0] }}
                     transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                   />
                   <motion.div
-                    className="absolute top-40 right-20 w-96 h-96 bg-pink-600 rounded-full blur-3xl"
+                    className="absolute top-40 right-20 w-120 h-120 bg-indigo-200 dark:bg-purple-600 rounded-full blur-3xl"
                     animate={{ y: [0, 40, 0], x: [0, -20, 0] }}
                     transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                   />
@@ -112,28 +113,28 @@ export default function Landing() {
                   >
                     {/* Status badge */}
                     <motion.div
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-full mb-8"
-                      animate={{ scale: [1, 1.05, 1] }}
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-full mb-8 shadow-sm"
+                      animate={{ scale: [1, 1.02, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                      <span className="text-green-400 text-sm font-medium uppercase tracking-wider">Access Granted</span>
+                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                      <span className="text-green-700 dark:text-green-400 text-xs font-bold uppercase tracking-widest">Access Granted</span>
                     </motion.div>
 
                     {/* Main heading */}
-                    <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
-                      <span className="block bg-gradient-to-r from-purple-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
+                    <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight tracking-tight">
+                      <span className="block text-slate-800 dark:text-white">
                         Welcome to
                       </span>
-                      <span className="block bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                      <span className="block text-blue-600 dark:text-blue-400">
                         {mediaContent?.title || 'Your Collection'}
                       </span>
                     </h2>
 
-                    <p className="text-gray-300 text-base md:text-lg max-w-2xl mx-auto mb-4">
+                    <p className="text-slate-600 dark:text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-4 font-medium">
                       Explore exclusive music videos and premium audio tracks
                     </p>
-                    <p className="text-gray-500 text-sm uppercase tracking-[0.3em]">
+                    <p className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-[0.2em]">
                       Limited Edition • Premium Content
                     </p>
                   </motion.div>
@@ -145,34 +146,34 @@ export default function Landing() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8, duration: 0.8 }}
                   >
-                    <div className="text-center">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-purple-500/30">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="text-center group">
+                      <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
+                        <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                         </svg>
                       </div>
-                      <p className="text-white font-semibold text-lg">Music Videos</p>
-                      <p className="text-gray-400 text-sm">HD Quality</p>
+                      <p className="text-slate-800 dark:text-white font-bold text-lg">Music Videos</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">HD Quality</p>
                     </div>
 
-                    <div className="text-center">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-cyan-500/30">
-                        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <div className="text-center group">
+                      <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
+                        <svg className="w-8 h-8 text-indigo-500 dark:text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
                         </svg>
                       </div>
-                      <p className="text-white font-semibold text-lg">Audio Tracks</p>
-                      <p className="text-gray-400 text-sm">Premium Sound</p>
+                      <p className="text-slate-800 dark:text-white font-bold text-lg">Audio Tracks</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Premium Sound</p>
                     </div>
 
-                    <div className="text-center">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-pink-500/30">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="text-center group">
+                      <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
+                        <svg className="w-8 h-8 text-cyan-500 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                         </svg>
                       </div>
-                      <p className="text-white font-semibold text-lg">Exclusive</p>
-                      <p className="text-gray-400 text-sm">Limited Edition</p>
+                      <p className="text-slate-800 dark:text-white font-bold text-lg">Exclusive</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Limited Edition</p>
                     </div>
                   </motion.div>
 
@@ -184,8 +185,8 @@ export default function Landing() {
                     transition={{ delay: 1.2, duration: 0.8 }}
                   >
                     <motion.div
-                      className="inline-flex flex-col items-center gap-2 text-gray-400"
-                      animate={{ y: [0, 10, 0] }}
+                      className="inline-flex flex-col items-center gap-2 text-slate-400 font-semibold"
+                      animate={{ y: [0, 8, 0] }}
                       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     >
                       <span className="text-sm uppercase tracking-wider">Scroll to explore</span>
@@ -203,29 +204,31 @@ export default function Landing() {
               <AudiobookSection initialContent={mediaContent} passcode={passcode} />
             ) : mediaContent?.type === 'SHORT_FILM' ? (
               <ShortFilmSection initialContent={mediaContent} passcode={passcode} />
+            ) : mediaContent?.type === 'DIGITAL_BOOK' ? (
+              <DigitalBookViewer initialContent={mediaContent} passcode={passcode} />
             ) : (
               <MediaSection initialContent={mediaContent} />
             )}
 
             {/* Footer */}
-            <footer className="relative border-t border-white/10 bg-black/30 backdrop-blur-xl">
+            <footer className="relative border-t border-slate-200 dark:border-white/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl transition-colors duration-500">
               <div className="max-w-7xl mx-auto px-6 md:px-8 py-12 text-center">
                 <div className="mb-6">
                   <div className="inline-flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md">
                       <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
                       </svg>
                     </div>
-                    <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                       Premium Collection
                     </span>
                   </div>
                 </div>
-                <p className="text-gray-400 text-sm mb-2">
+                <p className="text-slate-500 dark:text-slate-400 text-sm mb-2 font-medium">
                   © 2026 Premium Music Collection. All rights reserved.
                 </p>
-                <p className="text-gray-500 text-xs uppercase tracking-wider">
+                <p className="text-slate-400 dark:text-slate-500 text-xs uppercase tracking-widest font-semibold">
                   Limited Edition • Exclusive Content
                 </p>
               </div>

@@ -21,10 +21,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
+import bookRoutes from './routes/book.routes';
+
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/book', bookRoutes);
 
 
 // Centralized error handler

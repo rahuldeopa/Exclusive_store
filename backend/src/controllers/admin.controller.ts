@@ -138,9 +138,9 @@ export const updateContent = async (req: Request, res: Response) => {
                     type: item.type as MediaType,
                     source: item.source as MediaSource,
                     title: item.title,
-                    description: item.description,
                     youtubeId: item.youtubeId,
                     objectKey: item.objectKey,
+                    order: item.order ? parseInt(item.order, 10) : undefined,
                     contentSetId: Number(id)
                }));
                

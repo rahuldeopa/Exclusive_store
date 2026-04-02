@@ -7,12 +7,13 @@ type CreateContentInput = {
   expiresAt?: string;
   content: {
     title: string;
-    type: 'MUSIC' | 'AUDIOBOOK' | 'SHORT_FILM';
+    type: 'MUSIC' | 'AUDIOBOOK' | 'SHORT_FILM' | 'DIGITAL_BOOK';
     media: {
-      type: 'VIDEO' | 'AUDIO';
-      source: 'YOUTUBE' | 'R2';
+      type: 'VIDEO' | 'AUDIO' | 'DOCUMENT';
+      source: 'YOUTUBE' | 'R2' | 'SOUNDCLOUD';
       title: string;
       url: string; // yt link OR uploaded file path
+      order?: number;
     }[];
   };
 };
@@ -48,21 +49,30 @@ export async function createContentSetService(input: CreateContentInput) {
           type: MediaType.VIDEO,
           source: MediaSource.YOUTUBE,
           title: item.title,
-          description: (item as any).description,
           youtubeId: videoId,
+          order: item.order,
+          contentSetId: contentSet.id,
+        };
+      }
+
+      if (item.source === 'SOUNDCLOUD') {
+        return {
+          type: MediaType.AUDIO,
+          source: MediaSource.SOUNDCLOUD,
+          title: item.title,
+          objectKey: item.url,
+          order: item.order,
           contentSetId: contentSet.id,
         };
       }
 
       if (item.source === 'R2') {
-        // url = stored file path like: audio/file.wav
-        // Determine type based on item.type passed from frontend
         return {
-          type: item.type === 'VIDEO' ? MediaType.VIDEO : MediaType.AUDIO,
+          type: item.type === 'DOCUMENT' ? MediaType.DOCUMENT : (item.type === 'VIDEO' ? MediaType.VIDEO : MediaType.AUDIO),
           source: MediaSource.R2,
           title: item.title,
-          description: (item as any).description,
           objectKey: item.url,
+          order: item.order,
           contentSetId: contentSet.id,
         };
       }
