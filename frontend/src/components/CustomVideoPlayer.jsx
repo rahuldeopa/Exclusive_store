@@ -506,7 +506,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                             >
                                 {/* Progress */}
                                 <div
-                                    className="absolute top-0 left-0 h-full bg-linear-to-r from-purple-500 to-pink-500 rounded-full transition-all"
+                                    className="absolute top-0 left-0 h-full bg-[#ff6b35] rounded-full transition-all"
                                     style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                                 />
                                 {/* Hover effect */}
@@ -591,7 +591,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                                                     <button
                                                         key={quality}
                                                         onClick={() => handleQualityChange(quality)}
-                                                        className={`w-full px-4 py-2 text-left text-sm hover:bg-white/20 transition ${currentQuality === quality ? 'text-purple-400' : 'text-white'
+                                                        className={`w-full px-4 py-2 text-left text-sm hover:bg-white/20 transition ${currentQuality === quality ? 'text-[#ff6b35]' : 'text-white'
                                                             }`}
                                                     >
                                                         {quality === 'auto' ? 'Auto' : quality.toUpperCase()}
@@ -630,7 +630,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                     animate={{ scale: 1, opacity: 1 }}
                     className="absolute inset-0 flex items-center justify-center z-15 pointer-events-none"
                 >
-                    <div className="w-20 h-20 rounded-full bg-purple-500/30 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-full bg-[#ff6b35]/20 border border-[#ff6b35]/50 backdrop-blur-md flex items-center justify-center">
                         <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />
                         </svg>

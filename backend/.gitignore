@@ -3,3 +3,6 @@ dist/
 .env
 .env.*
 .prisma/
+.md
+CLAUDE.md
+DESIGN.md

@@ -5,6 +5,7 @@ import MediaSection from '../components/MediaSection';
 import AudiobookSection from '../components/AudiobookSection';
 import ShortFilmSection from '../components/ShortFilmSection';
 import DigitalBookViewer from '../components/DigitalBook/DigitalBookViewer';
+import { Video, Music, Sparkles, ArrowDown, Lock } from 'lucide-react';
 
 /**
  * Landing Page
@@ -36,13 +37,13 @@ export default function Landing() {
         ) : (
           <motion.div
             key="content"
-            className="w-full min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 transition-colors duration-500"
+            className="w-full min-h-screen bg-[#f5f3f0] dark:bg-[#0a0a0a] text-[#0a0a0a] dark:text-[#f5f3f0] transition-colors duration-500"
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
             {/* Header - Light premium theme */}
-            <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800 shadow-sm transition-colors duration-500">
+            <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-white/80 dark:bg-[#0a0a0a]/80 border-b border-[#e5e5e5] dark:border-[#2a2a2a] shadow-sm transition-colors duration-500">
               <motion.div
                 className="max-w-7xl mx-auto px-6 md:px-8 py-5 flex items-center justify-between"
                 initial={{ opacity: 0, y: -10, scale: 0.95 }}
@@ -52,25 +53,23 @@ export default function Landing() {
                 {/* Logo/Brand */}
                 <div className="flex items-center gap-4">
                   <motion.div
-                    className="w-10 h-10 rounded-xl bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20"
+                    className="w-10 h-10 rounded-xl bg-[#ff6b35]/10 border border-[#ff6b35]/20 flex items-center justify-center shadow-md shadow-[#ff6b35]/10"
                     animate={{ rotate: [0, 5, -5, 0] }}
                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                   >
-                    <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                    </svg>
+                    <Music className="w-5 h-5 text-[#ff6b35]" />
                   </motion.div>
                   <div>
-                    <h1 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    <h1 className="text-xl md:text-2xl font-light font-serif text-[#0a0a0a] dark:text-[#f5f3f0] tracking-tight">
                       Premium Collection
                     </h1>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-[0.15em] font-medium">Limited Edition</p>
+                    <p className="text-[#888888] text-[10px] uppercase tracking-[0.2em] font-bold">Limited Edition</p>
                   </div>
                 </div>
 
                 {/* Lock Button */}
                 <motion.button
-                  className="group px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 uppercase text-xs tracking-widest font-semibold rounded-xl flex items-center gap-2 shadow-sm"
+                  className="group px-5 py-2.5 bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#ff6b35]/50 hover:bg-slate-50 dark:hover:bg-[#2d2d2d] text-[#888888] hover:text-[#0a0a0a] dark:hover:text-[#f5f3f0] transition-all duration-300 uppercase text-xs tracking-widest font-bold rounded-xl flex items-center gap-2 shadow-sm"
                   onClick={() => setIsUnlocked(false)}
                   title="Re-lock content"
                   initial={{ opacity: 0, x: 20 }}
@@ -79,9 +78,7 @@ export default function Landing() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
+                  <Lock className="w-4 h-4" />
                   <span>Lock</span>
                 </motion.button>
               </motion.div>
@@ -91,14 +88,14 @@ export default function Landing() {
             {mediaContent?.type === 'MUSIC' && (
               <section className="relative w-full py-24 overflow-hidden ">
                 {/* Background decorations */}
-                <div className="absolute inset-0 opacity-40 dark:opacity-20 pointer-events-none">
+                <div className="absolute inset-0 opacity-20 pointer-events-none">
                   <motion.div
-                    className="absolute top-20 left-10 w-80 h-80 bg-blue-300 dark:bg-blue-600 rounded-full blur-3xl"
+                    className="absolute top-20 left-10 w-80 h-80 bg-[#ff6b35]/5 rounded-full blur-3xl"
                     animate={{ y: [0, -30, 0], x: [0, 20, 0] }}
                     transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
                   />
                   <motion.div
-                    className="absolute top-40 right-20 w-120 h-120 bg-indigo-200 dark:bg-purple-600 rounded-full blur-3xl"
+                    className="absolute top-40 right-20 w-120 h-120 bg-[#ff6b35]/5 rounded-full blur-3xl"
                     animate={{ y: [0, 40, 0], x: [0, -20, 0] }}
                     transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
                   />
@@ -113,28 +110,28 @@ export default function Landing() {
                   >
                     {/* Status badge */}
                     <motion.div
-                      className="inline-flex items-center gap-2 px-4 py-2 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-full mb-8 shadow-sm"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-[#ff6b35]/10 border border-[#ff6b35]/25 rounded-full mb-8 shadow-sm"
                       animate={{ scale: [1, 1.02, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-                      <span className="text-green-700 dark:text-green-400 text-xs font-bold uppercase tracking-widest">Access Granted</span>
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#ff6b35] animate-pulse shadow-[0_0_8px_rgba(255,107,53,0.6)]"></div>
+                      <span className="text-[#ff6b35] text-[10px] font-bold uppercase tracking-widest">Access Granted</span>
                     </motion.div>
 
                     {/* Main heading */}
-                    <h2 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight tracking-tight">
-                      <span className="block text-slate-800 dark:text-white">
+                    <h2 className="text-5xl md:text-7xl lg:text-8xl font-light font-serif mb-6 leading-tight tracking-tight">
+                      <span className="block text-[#0a0a0a] dark:text-[#f5f3f0]">
                         Welcome to
                       </span>
-                      <span className="block text-blue-600 dark:text-blue-400">
+                      <span className="block text-[#ff6b35] italic">
                         {mediaContent?.title || 'Your Collection'}
                       </span>
                     </h2>
 
-                    <p className="text-slate-600 dark:text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-4 font-medium">
+                    <p className="text-[#888888] text-base md:text-lg max-w-2xl mx-auto mb-4 font-light">
                       Explore exclusive music videos and premium audio tracks
                     </p>
-                    <p className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-[0.2em]">
+                    <p className="text-[#555555] text-xs font-bold uppercase tracking-[0.25em]">
                       Limited Edition • Premium Content
                     </p>
                   </motion.div>
@@ -147,33 +144,27 @@ export default function Landing() {
                     transition={{ delay: 0.8, duration: 0.8 }}
                   >
                     <div className="text-center group">
-                      <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
-                        <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
+                      <div className="w-16 h-16 rounded-2xl bg-white/60 dark:bg-[#1a1a1a]/50 border border-[#e5e5e5] dark:border-[#2a2a2a] flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
+                        <Video className="w-6 h-6 text-[#ff6b35]" />
                       </div>
-                      <p className="text-slate-800 dark:text-white font-bold text-lg">Music Videos</p>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">HD Quality</p>
+                      <p className="text-[#0a0a0a] dark:text-[#f5f3f0] font-bold text-lg font-serif">Music Videos</p>
+                      <p className="text-[#888888] text-sm font-light">HD Quality</p>
                     </div>
 
                     <div className="text-center group">
-                      <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
-                        <svg className="w-8 h-8 text-indigo-500 dark:text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                        </svg>
+                      <div className="w-16 h-16 rounded-2xl bg-white/60 dark:bg-[#1a1a1a]/50 border border-[#e5e5e5] dark:border-[#2a2a2a] flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
+                        <Music className="w-6 h-6 text-[#ff6b35]" />
                       </div>
-                      <p className="text-slate-800 dark:text-white font-bold text-lg">Audio Tracks</p>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Premium Sound</p>
+                      <p className="text-[#0a0a0a] dark:text-[#f5f3f0] font-bold text-lg font-serif">Audio Tracks</p>
+                      <p className="text-[#888888] text-sm font-light">Premium Sound</p>
                     </div>
 
                     <div className="text-center group">
-                      <div className="w-16 h-16 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
-                        <svg className="w-8 h-8 text-cyan-500 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
+                      <div className="w-16 h-16 rounded-2xl bg-white/60 dark:bg-[#1a1a1a]/50 border border-[#e5e5e5] dark:border-[#2a2a2a] flex items-center justify-center mx-auto mb-4 shadow-sm group-hover:shadow-md group-hover:-translate-y-1 transition-all duration-300">
+                        <Sparkles className="w-6 h-6 text-[#ff6b35]" />
                       </div>
-                      <p className="text-slate-800 dark:text-white font-bold text-lg">Exclusive</p>
-                      <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Limited Edition</p>
+                      <p className="text-[#0a0a0a] dark:text-[#f5f3f0] font-bold text-lg font-serif">Exclusive</p>
+                      <p className="text-[#888888] text-sm font-light">Limited Edition</p>
                     </div>
                   </motion.div>
 
@@ -185,14 +176,12 @@ export default function Landing() {
                     transition={{ delay: 1.2, duration: 0.8 }}
                   >
                     <motion.div
-                      className="inline-flex flex-col items-center gap-2 text-slate-400 font-semibold"
+                      className="inline-flex flex-col items-center gap-2 text-[#888888] font-bold"
                       animate={{ y: [0, 8, 0] }}
                       transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                     >
-                      <span className="text-sm uppercase tracking-wider">Scroll to explore</span>
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
+                      <span className="text-xs uppercase tracking-[0.2em]">Scroll to explore</span>
+                      <ArrowDown className="w-5 h-5 text-[#ff6b35]" />
                     </motion.div>
                   </motion.div>
                 </div>
@@ -211,24 +200,22 @@ export default function Landing() {
             )}
 
             {/* Footer */}
-            <footer className="relative border-t border-slate-200 dark:border-white/10 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl transition-colors duration-500">
+            <footer className="relative border-t border-[#e5e5e5] dark:border-[#2a2a2a] bg-white/50 dark:bg-[#0a0a0a]/50 backdrop-blur-xl transition-colors duration-500">
               <div className="max-w-7xl mx-auto px-6 md:px-8 py-12 text-center">
                 <div className="mb-6">
                   <div className="inline-flex items-center gap-3 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-linear-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md">
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-                      </svg>
+                    <div className="w-8 h-8 rounded-lg bg-[#ff6b35]/10 border border-[#ff6b35]/20 flex items-center justify-center shadow-md">
+                      <Music className="w-4 h-4 text-[#ff6b35]" />
                     </div>
-                    <span className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+                    <span className="text-xl font-light font-serif text-[#0a0a0a] dark:text-[#f5f3f0] tracking-tight">
                       Premium Collection
                     </span>
                   </div>
                 </div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm mb-2 font-medium">
+                <p className="text-[#888888] text-sm mb-2 font-light">
                   © 2026 Premium Music Collection. All rights reserved.
                 </p>
-                <p className="text-slate-400 dark:text-slate-500 text-xs uppercase tracking-widest font-semibold">
+                <p className="text-[#555555] text-xs uppercase tracking-widest font-bold">
                   Limited Edition • Exclusive Content
                 </p>
               </div>

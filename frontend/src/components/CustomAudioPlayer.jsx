@@ -1,11 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../contexts/ThemeContext';
 
 /**
  * CustomAudioPlayer Component
  * Premium audio player with dark, music-focused aesthetic
  */
 export default function CustomAudioPlayer({ src, title, passcode, contentId, chapterIndex, seekTrigger }) {
+  const { isDark } = useTheme();
   const audioRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -154,19 +156,19 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
 
       {/* Player Container */}
       <motion.div
-        className="relative backdrop-blur-xl bg-linear-to-br from-white/5 to-white/10 border border-white/20 rounded-2xl p-5 overflow-hidden group hover:border-cyan-500/40 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-500"
+        className="relative backdrop-blur-xl bg-white/40 dark:bg-[#1a1a1a]/40 border border-[#e5e5e5] dark:border-[#2a2a2a] rounded-2xl p-5 overflow-hidden group hover:border-[#ff6b35]/40 hover:shadow-lg hover:shadow-[#ff6b35]/5 transition-all duration-500"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
         {/* Animated gradient overlay */}
-        <div className="absolute inset-0 bg-linear-to-br from-cyan-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#ff6b35]/3 via-transparent to-transparent pointer-events-none" />
 
         {/* Pulsing glow effects */}
         <motion.div
-          className="absolute -top-24 -left-24 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl"
+          className="absolute -top-24 -left-24 w-48 h-48 bg-[#ff6b35]/10 rounded-full blur-3xl"
           animate={{
-            scale: isPlaying ? [1, 1.3, 1] : 1,
+            scale: isPlaying ? [1, 1.2, 1] : 1,
             opacity: isPlaying ? [0.2, 0.4, 0.2] : 0.1,
           }}
           transition={{
@@ -176,9 +178,9 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
           }}
         />
         <motion.div
-          className="absolute -bottom-24 -right-24 w-48 h-48 bg-purple-500/20 rounded-full blur-3xl"
+          className="absolute -bottom-24 -right-24 w-48 h-48 bg-[#ff6b35]/10 rounded-full blur-3xl"
           animate={{
-            scale: isPlaying ? [1, 1.3, 1] : 1,
+            scale: isPlaying ? [1, 1.2, 1] : 1,
             opacity: isPlaying ? [0.2, 0.4, 0.2] : 0.1,
           }}
           transition={{
@@ -194,7 +196,7 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
           <div className="flex items-start gap-4">
             {/* Play/Pause Button */}
             <motion.button
-              className="relative flex items-center justify-center w-16 h-16 rounded-2xl shrink-0 bg-linear-to-br from-cyan-500 via-purple-500 to-pink-500 hover:from-cyan-400 hover:via-purple-400 hover:to-pink-400 shadow-xl shadow-cyan-500/30 group/btn overflow-hidden"
+              className="relative flex items-center justify-center w-16 h-16 rounded-2xl shrink-0 bg-[#ff6b35] hover:bg-[#ff8c5a] shadow-xl shadow-[#ff6b35]/20 group/btn overflow-hidden"
               onClick={handlePlayPause}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -202,7 +204,7 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
             >
               {/* Shimmer effect */}
               <motion.div
-                className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent"
+                className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent"
                 animate={{
                   x: ['-100%', '200%'],
                 }}
@@ -249,7 +251,7 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
             <div className="flex-1 min-w-0 pt-1">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-white truncate mb-1">
+                  <h3 className="text-lg font-light font-serif text-[#0a0a0a] dark:text-[#f5f3f0] truncate mb-1">
                     {title}
                   </h3>
                   <div className="flex items-center gap-2">
@@ -258,8 +260,8 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
                       animate={isPlaying ? { opacity: [0.5, 1, 0.5] } : { opacity: 0.5 }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      <div className="w-1 h-1 rounded-full bg-cyan-400"></div>
-                      <span className="text-xs text-cyan-400 uppercase tracking-wider">
+                      <div className="w-1 h-1 rounded-full bg-[#ff6b35]"></div>
+                      <span className="text-[10px] text-[#ff6b35] uppercase tracking-wider font-bold">
                         {isPlaying ? 'Now Playing' : 'Ready'}
                       </span>
                     </motion.div>
@@ -273,7 +275,7 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
                   onMouseLeave={() => setShowVolume(false)}
                 >
                   <button
-                    className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200"
+                    className="w-9 h-9 flex items-center justify-center text-slate-500 dark:text-gray-400 hover:text-[#0a0a0a] dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5 rounded-lg transition-all duration-200"
                     aria-label="Volume"
                   >
                     {volume === 0 ? (
@@ -298,19 +300,19 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
                         initial={{ opacity: 0, y: -10, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: -10, scale: 0.9 }}
-                        className="absolute bottom-full right-0 mb-2 p-3 bg-gray-900/95 backdrop-blur-xl rounded-xl border border-white/20 shadow-2xl"
+                        className="absolute bottom-full right-0 mb-2 p-3 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-xl border border-slate-200 dark:border-white/20 shadow-2xl"
                       >
                         <div className="flex flex-col items-center gap-2">
-                          <span className="text-xs text-gray-400 font-medium">{Math.round(volume * 100)}%</span>
+                           <span className="text-xs text-slate-600 dark:text-gray-400 font-medium">{Math.round(volume * 100)}%</span>
                           <input
                             type="range"
                             min="0"
                             max="100"
                             value={volume * 100}
                             onChange={handleVolumeChange}
-                            className="w-24 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-cyan-500"
+                            className="w-24 h-1 bg-slate-200 dark:bg-white/10 rounded-full appearance-none cursor-pointer accent-[#ff6b35]"
                             style={{
-                              background: `linear-gradient(to right, rgb(6 182 212) 0%, rgb(6 182 212) ${volume * 100}%, rgba(255,255,255,0.1) ${volume * 100}%, rgba(255,255,255,0.1) 100%)`
+                              background: `linear-gradient(to right, rgb(255 107 53) 0%, rgb(255 107 53) ${volume * 100}%, ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} ${volume * 100}%, ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} 100%)`
                             }}
                           />
                         </div>
@@ -324,7 +326,7 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
 
           {/* Progress Bar Section */}
           <div className="space-y-2">
-            <div className="relative h-2 bg-white/10 rounded-full overflow-hidden cursor-pointer group/progress">
+            <div className="relative h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden cursor-pointer group/progress">
               <input
                 type="range"
                 min="0"
@@ -340,42 +342,42 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
               />
 
               {/* Background track */}
-              <div className="absolute inset-0 bg-linear-to-r from-white/5 to-white/10 rounded-full"></div>
+              <div className="absolute inset-0 bg-slate-300/20 dark:bg-white/5 rounded-full"></div>
 
               {/* Progress fill with gradient */}
               <motion.div
-                className="absolute inset-y-0 left-0 h-full bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 rounded-full"
+                className="absolute inset-y-0 left-0 h-full bg-[#ff6b35] rounded-full"
                 style={{ width: `${progress}%` }}
                 transition={{ duration: isSeeking ? 0 : 0.1 }}
               />
 
               {/* Progress glow effect */}
               <motion.div
-                className="absolute inset-y-0 left-0 h-full bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-full blur-md"
+                className="absolute inset-y-0 left-0 h-full bg-[#ff6b35] rounded-full blur-md"
                 style={{ width: `${progress}%` }}
-                initial={{ opacity: 0.3 }}
-                animate={{ opacity: isPlaying ? [0.3, 0.6, 0.3] : 0.3 }}
+                initial={{ opacity: 0.15 }}
+                animate={{ opacity: isPlaying ? [0.15, 0.3, 0.15] : 0.15 }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
 
               {/* Hover indicator dot */}
               <motion.div
-                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg shadow-cyan-500/50 border-2 border-cyan-400 opacity-0 group-hover/progress:opacity-100 transition-opacity pointer-events-none"
+                className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg shadow-[#ff6b35]/50 border-2 border-[#ff6b35] opacity-0 group-hover/progress:opacity-100 transition-opacity pointer-events-none"
                 style={{ left: `calc(${progress}% - 8px)` }}
               />
             </div>
 
             {/* Time Display */}
             <div className="flex items-center justify-between text-xs font-mono">
-              <span className="text-cyan-400 font-medium">{formatTime(currentTime)}</span>
-              <span className="text-gray-500">/</span>
-              <span className="text-gray-400">{formatTime(duration)}</span>
+              <span className="text-[#ff6b35] font-medium">{formatTime(currentTime)}</span>
+              <span className="text-slate-400 dark:text-gray-500">/</span>
+              <span className="text-slate-600 dark:text-gray-400">{formatTime(duration)}</span>
             </div>
           </div>
 
           {/* Waveform Visualization */}
           <motion.div
-            className="flex items-end justify-center gap-0.5 h-16 px-1 rounded-xl bg-white/5"
+            className="flex items-end justify-center gap-0.5 h-16 px-1 rounded-xl bg-slate-200/30 dark:bg-white/5"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
@@ -386,8 +388,8 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
                 className="flex-1 rounded-full"
                 style={{
                   background: isPlaying
-                    ? 'linear-gradient(to top, rgb(6 182 212), rgb(168 85 247), rgb(236 72 153))'
-                    : 'rgba(255, 255, 255, 0.1)',
+                    ? 'rgb(255 107 53)'
+                    : isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
                 }}
                 animate={
                   isPlaying
@@ -417,7 +419,7 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
               {isPlaying ? (
                 <motion.div
                   key="playing"
-                  className="flex items-center gap-2 text-cyan-400"
+                  className="flex items-center gap-2 text-[#ff6b35]"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -436,7 +438,7 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
               ) : (
                 <motion.div
                   key="paused"
-                  className="flex items-center gap-2 text-gray-500"
+                  className="flex items-center gap-2 text-slate-500 dark:text-gray-500"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
@@ -450,7 +452,7 @@ export default function CustomAudioPlayer({ src, title, passcode, contentId, cha
         </div>
 
         {/* Outer glow effect */}
-        <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-cyan-500/0 via-purple-500/10 to-pink-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm pointer-events-none -z-10"></div>
+        <div className="absolute -inset-px rounded-2xl bg-gradient-to-br from-[#ff6b35]/0 via-[#ff6b35]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm pointer-events-none -z-10"></div>
       </motion.div>
     </div>
   );

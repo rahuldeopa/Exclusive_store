@@ -11,7 +11,7 @@ function App() {
   return (
     <ThemeProvider>
       <ToastProvider>
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 transition-colors duration-500 font-sans">
+        <div className="min-h-screen bg-[#f5f3f0] dark:bg-[#0a0a0a] text-[#0a0a0a] dark:text-[#f5f3f0] transition-colors duration-500 font-sans">
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Landing />} />

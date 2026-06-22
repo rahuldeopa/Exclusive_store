@@ -92,11 +92,11 @@ export default function AudiobookSection({ initialContent, passcode }) {
     };
 
     return (
-        <div className="w-full min-h-screen bg-slate-50 dark:bg-[#0a0a0a] text-slate-900 dark:text-white selection:bg-blue-500/30 font-sans overflow-x-hidden transition-colors duration-500">
+        <div className="w-full min-h-screen bg-[#f5f3f0] dark:bg-[#0a0a0a] text-[#0a0a0a] dark:text-[#f5f3f0] selection:bg-[#ff6b35]/30 font-sans overflow-x-hidden transition-colors duration-500">
             {/* Immersive Background Decor */}
-            <div className="fixed inset-0 pointer-events-none -z-10 bg-linear-to-br from-blue-50 via-slate-50 to-indigo-50 dark:from-slate-950 dark:via-[#0a0a0a] dark:to-slate-950">
-                <div className="absolute top-0 left-0 w-[50vw] h-[50vw] bg-blue-600/5 dark:bg-indigo-600/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-0 right-0 w-[40vw] h-[40vw] bg-indigo-600/5 dark:bg-purple-600/10 rounded-full blur-[120px]" />
+            <div className="fixed inset-0 pointer-events-none -z-10 bg-[#f5f3f0] dark:bg-[#0a0a0a] transition-colors duration-500">
+                <div className="absolute top-0 left-0 w-[50vw] h-[50vw] bg-[#ff6b35]/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-0 right-0 w-[40vw] h-[40vw] bg-[#ff6b35]/5 rounded-full blur-[120px]" />
             </div>
 
             <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 py-6 px-4 sm:px-6 md:px-8 lg:py-24 lg:px-12 landscape-audiobook-grid">
@@ -104,10 +104,10 @@ export default function AudiobookSection({ initialContent, passcode }) {
                 {/* Left Side: Chapter List */}
                 <div className="lg:col-span-4 space-y-4 sm:space-y-6 z-10">
                     <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 lg:mb-8">
-                        <div className="p-2 sm:p-3 bg-blue-100 dark:bg-indigo-500/20 rounded-xl sm:rounded-2xl border border-blue-200 dark:border-indigo-500/30 shadow-sm">
-                            <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-indigo-400" />
+                        <div className="p-2 sm:p-3 bg-[#ff6b35]/10 rounded-xl sm:rounded-2xl border border-[#ff6b35]/25 shadow-sm">
+                            <BookOpen className="w-5 h-5 sm:w-6 sm:h-6 text-[#ff6b35]" />
                         </div>
-                        <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Chapters</h2>
+                        <h2 className="text-lg sm:text-xl lg:text-2xl font-light font-serif text-[#0a0a0a] dark:text-[#f5f3f0] tracking-tight">Chapters</h2>
                     </div>
 
                     <div className="space-y-2 sm:space-y-3 max-h-[35vh] sm:max-h-[40vh] lg:max-h-[60vh] overflow-y-auto pr-1 sm:pr-2 custom-scrollbar">
@@ -116,30 +116,30 @@ export default function AudiobookSection({ initialContent, passcode }) {
                                 key={index}
                                 onClick={() => handleChapterClick(index, chapter)}
                                 className={`w-full text-left p-3 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-300 flex items-center gap-3 sm:gap-4 group ${currentChapterIndex === index
-                                    ? 'bg-blue-50 border-blue-200 shadow-md dark:bg-indigo-500/20 dark:border-indigo-500/50 dark:shadow-indigo-500/10'
-                                    : 'bg-white border-slate-200 hover:bg-slate-50 hover:border-blue-200 dark:bg-white/5 dark:border-white/5 dark:hover:bg-white/10 dark:hover:border-white/10'
+                                    ? 'bg-[#ff6b35]/10 border-[#ff6b35]/30 shadow-md dark:shadow-[#ff6b35]/5'
+                                    : 'bg-white/40 dark:bg-[#1a1a1a]/40 border-[#e5e5e5] dark:border-[#2a2a2a] hover:bg-white/80 dark:hover:bg-[#1a1a1a]/80 hover:border-[#ff6b35]/30'
                                     }`}
                                 whileHover={{ x: 4 }}
                                 whileTap={{ scale: 0.98 }}
                             >
-                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-base font-bold tracking-tight transition-colors shrink-0 ${currentChapterIndex === index ? 'bg-blue-600 text-white dark:bg-indigo-500' : 'bg-slate-100 text-slate-500 group-hover:bg-blue-100 dark:bg-white/10 dark:text-gray-400 dark:group-hover:bg-white/20'
+                                <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm sm:text-base font-bold tracking-tight transition-colors shrink-0 ${currentChapterIndex === index ? 'bg-[#ff6b35] text-white' : 'bg-slate-100 dark:bg-[#2a2a2a] text-[#888888] group-hover:bg-[#ff6b35]/20 group-hover:text-[#ff6b35]'
                                     }`}>
                                     {index + 1}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h3 className={`font-semibold truncate ${currentChapterIndex === index ? 'text-blue-900 dark:text-white' : 'text-slate-600 dark:text-gray-400 group-hover:text-blue-700 dark:group-hover:text-gray-200'}`}>
+                                    <h3 className={`font-semibold truncate ${currentChapterIndex === index ? 'text-[#ff6b35]' : 'text-[#888888] group-hover:text-[#0a0a0a] dark:group-hover:text-[#f5f3f0]'}`}>
                                         {chapter.title}
                                     </h3>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <Clock className="w-3 h-3 text-slate-400 dark:text-gray-500" />
-                                        <span className="text-[10px] text-slate-500 dark:text-gray-500 uppercase tracking-wider font-medium">
+                                        <Clock className="w-3 h-3 text-[#555555]" />
+                                        <span className="text-[10px] text-[#888888] uppercase tracking-wider font-bold">
                                             {chapter.time > 0 ? `${Math.floor(chapter.time / 60)}:${(chapter.time % 60).toString().padStart(2, '0')}` : `Chapter ${index + 1}`}
                                         </span>
                                     </div>
                                 </div>
                                 {currentChapterIndex === index && (
                                     <motion.div layoutId="active-indicator">
-                                        <Play className="w-4 h-4 text-blue-600 dark:text-indigo-400 fill-current" />
+                                        <Play className="w-4 h-4 text-[#ff6b35] fill-current" />
                                     </motion.div>
                                 )}
                             </motion.button>
@@ -159,8 +159,8 @@ export default function AudiobookSection({ initialContent, passcode }) {
                             className="glass-panel-light p-4 sm:p-6 md:p-10 lg:p-16 relative overflow-hidden h-full flex flex-col justify-center min-h-[300px] sm:min-h-[400px] lg:min-h-[600px] rounded-2xl sm:rounded-3xl lg:rounded-4xl transition-colors duration-500"
                         >
                             {/* Animated pattern background */}
-                            <div className="absolute inset-0 opacity-5 dark:opacity-5 pointer-events-none">
-                                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#3b82f6,transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,#6366f1,transparent_70%)]"></div>
+                            <div className="absolute inset-0 opacity-5 pointer-events-none">
+                                <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,#ff6b35,transparent_70%)]"></div>
                             </div>
 
                             <div className="relative z-10 space-y-12">
@@ -168,7 +168,7 @@ export default function AudiobookSection({ initialContent, passcode }) {
                                     <motion.span
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="inline-block px-3 py-1 sm:px-4 sm:py-1.5 bg-blue-100 dark:bg-indigo-500/10 border border-blue-200 dark:border-indigo-500/20 rounded-full text-blue-700 dark:text-indigo-400 text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em]"
+                                        className="inline-block px-3 py-1 sm:px-4 sm:py-1.5 bg-[#ff6b35]/10 border border-[#ff6b35]/25 rounded-full text-[#ff6b35] text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]"
                                     >
                                         Now Playing • Chapter {currentChapterIndex + 1}
                                     </motion.span>
@@ -176,7 +176,7 @@ export default function AudiobookSection({ initialContent, passcode }) {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: 0.1 }}
-                                        className="text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-slate-900 dark:text-white leading-tight"
+                                        className="text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-light font-serif text-[#0a0a0a] dark:text-[#f5f3f0] leading-tight"
                                     >
                                         {parsedChapters[currentChapterIndex]?.title}
                                     </motion.h3>
@@ -213,7 +213,7 @@ export default function AudiobookSection({ initialContent, passcode }) {
                                     <button
                                         disabled={currentChapterIndex === 0}
                                         onClick={prevChapter}
-                                        className="flex items-center gap-2 text-slate-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed group"
+                                        className="flex items-center gap-2 text-[#888888] hover:text-[#0a0a0a] dark:hover:text-[#f5f3f0] transition-colors disabled:opacity-20 disabled:cursor-not-allowed group"
                                     >
                                         <ChevronRight className="w-5 h-5 rotate-180 group-hover:-translate-x-1 transition-transform" />
                                         <span className="font-bold uppercase tracking-wider sm:tracking-widest text-xs sm:text-sm">Previous</span>
@@ -221,14 +221,14 @@ export default function AudiobookSection({ initialContent, passcode }) {
 
                                     <div className="flex gap-1 sm:gap-1.5 max-w-[120px] sm:max-w-none overflow-hidden h-2">
                                         {parsedChapters.map((_, i) => (
-                                            <div key={i} className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all duration-300 shrink-0 ${i === currentChapterIndex ? 'w-4 sm:w-6 bg-blue-600 dark:bg-indigo-500' : 'bg-slate-300 dark:bg-white/10'}`}></div>
+                                            <div key={i} className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-all duration-300 shrink-0 ${i === currentChapterIndex ? 'w-4 sm:w-6 bg-[#ff6b35]' : 'bg-[#2a2a2a]'}`}></div>
                                         ))}
                                     </div>
 
                                     <button
                                         disabled={currentChapterIndex === chapters.length - 1}
                                         onClick={nextChapter}
-                                        className="flex items-center gap-2 text-slate-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed group"
+                                        className="flex items-center gap-2 text-[#888888] hover:text-[#0a0a0a] dark:hover:text-[#f5f3f0] transition-colors disabled:opacity-20 disabled:cursor-not-allowed group"
                                     >
                                         <span className="font-bold uppercase tracking-wider sm:tracking-widest text-xs sm:text-sm">Next</span>
                                         <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
