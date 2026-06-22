@@ -21,6 +21,14 @@ export default function DigitalBookViewer({ passcode, initialContent }) {
   const [epubLoading, setEpubLoading] = useState(false);
   const [epubError, setEpubError] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [rendition, setRendition] = useState(null);
+
+  useEffect(() => {
+    if (rendition) {
+      rendition.themes.override('color', isDark ? '#f5f3f0' : '#0a0a0a');
+      rendition.themes.override('background', isDark ? '#0a0a0a' : '#ffffff');
+    }
+  }, [isDark, rendition]);
 
   if (!initialContent) {
     return (
@@ -168,8 +176,9 @@ export default function DigitalBookViewer({ passcode, initialContent }) {
                       url={epubData}
                       location={location}
                       locationChanged={(epubcifi) => setLocation(epubcifi)}
-                      getRendition={(rendition) => {
-                        rendition.themes.default({
+                      getRendition={(val) => {
+                        setRendition(val);
+                        val.themes.default({
                           '::selection': { background: 'rgba(255, 107, 53, 0.3)' },
                           body: {
                             fontFamily: 'Georgia, serif',
