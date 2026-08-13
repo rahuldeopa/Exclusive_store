@@ -29,6 +29,9 @@ app.use('/api/content', contentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/book', bookRoutes);
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
 
 // Centralized error handler
 app.use(errorHandler);
