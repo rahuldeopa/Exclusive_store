@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { validatePasscode } from '../services/api';
 
@@ -7,20 +7,27 @@ import { validatePasscode } from '../services/api';
  * Implements the Premium Artistic Design System:
  * Pure black backdrop, burnt orange accents, and editorial typography.
  */
-export default function PasscodeGate({ onUnlock }) {
-  const [passcode, setPasscode] = useState('');
+export default function PasscodeGate({ onUnlock, initialPasscode = '' }) {
+  const [passcode, setPasscode] = useState(initialPasscode);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
+  const [hasAutoSubmitted, setHasAutoSubmitted] = useState(false);
 
-  const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
-    if (passcode.length === 0) return;
+  useEffect(() => {
+    if (initialPasscode && !hasAutoSubmitted) {
+      setHasAutoSubmitted(true);
+      validateCode(initialPasscode);
+    }
+  }, [initialPasscode, hasAutoSubmitted]);
+
+  const validateCode = async (codeToValidate) => {
+    if (!codeToValidate) return;
     setError('');
     setLoading(true);
 
     try {
-      const result = await validatePasscode(passcode);
+      const result = await validatePasscode(codeToValidate);
 
       if (!result.ok) {
         setError(result.data?.message || 'Invalid passcode');
@@ -30,7 +37,7 @@ export default function PasscodeGate({ onUnlock }) {
       }
 
       setPasscode('');
-      onUnlock(result.data?.data?.content, passcode);
+      onUnlock(result.data?.data?.content, codeToValidate);
     } catch (err) {
       setError('Unable to connect. Please try again.');
       setIsShaking(true);
@@ -39,6 +46,11 @@ export default function PasscodeGate({ onUnlock }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSubmit = async (e) => {
+    if (e) e.preventDefault();
+    validateCode(passcode);
   };
 
   const handleInputChange = (e) => {

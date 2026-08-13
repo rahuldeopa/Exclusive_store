@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import PasscodeGate from '../components/PasscodeGate';
 import MediaSection from '../components/MediaSection';
@@ -12,9 +13,11 @@ import { Video, Music, Sparkles, ArrowDown, Lock } from 'lucide-react';
  * Premium music store experience with ceremonial unlock transition
  */
 export default function Landing() {
+  const [searchParams] = useSearchParams();
+  const initialPasscode = searchParams.get('passcode') || '';
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [mediaContent, setMediaContent] = useState(null);
-  const [passcode, setPasscode] = useState('');
+  const [passcode, setPasscode] = useState(initialPasscode);
 
   const handleUnlock = (content, code) => {
     setIsUnlocked(true);
@@ -32,7 +35,7 @@ export default function Landing() {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.6 }}
           >
-            <PasscodeGate onUnlock={handleUnlock} />
+            <PasscodeGate onUnlock={handleUnlock} initialPasscode={initialPasscode} />
           </motion.div>
         ) : (
           <motion.div

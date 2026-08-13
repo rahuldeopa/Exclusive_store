@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Edit2, Trash2, Loader2, Video, Key } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Loader2, Video, Key, QrCode } from 'lucide-react';
+import { QRCodeCanvas } from 'qrcode.react';
 import api from '../services/api';
 import CreateEditModal from '../components/CreateEditModal';
 import { useToast } from '../contexts/ToastContext';
@@ -59,6 +60,19 @@ const AdminDashboard = () => {
         item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.accessCode?.code?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const handleDownloadQR = (passcodeCode) => {
+        const canvas = document.getElementById(`qr-code-${passcodeCode}`);
+        if (canvas) {
+            const pngUrl = canvas.toDataURL('image/png');
+            const downloadLink = document.createElement('a');
+            downloadLink.href = pngUrl;
+            downloadLink.download = `qrcode-${passcodeCode}.png`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    };
 
     return (
         <div className="space-y-8 transition-colors duration-500">
@@ -141,6 +155,24 @@ const AdminDashboard = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex items-center justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                                                <div style={{ display: 'none' }}>
+                                                    {item.accessCode?.code && (
+                                                        <QRCodeCanvas 
+                                                            id={`qr-code-${item.accessCode.code}`} 
+                                                            value={`${window.location.origin}/?passcode=${item.accessCode.code}`} 
+                                                            size={256} 
+                                                            level={"H"}
+                                                            includeMargin={true}
+                                                        />
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDownloadQR(item.accessCode?.code)}
+                                                    className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-green-100 dark:hover:bg-green-500 hover:text-green-700 dark:hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-colors"
+                                                    title="Download QR"
+                                                >
+                                                    <QrCode size={16} />
+                                                </button>
                                                 <button
                                                     onClick={() => handleEdit(item)}
                                                     className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-blue-500 hover:text-blue-700 dark:hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-colors"
