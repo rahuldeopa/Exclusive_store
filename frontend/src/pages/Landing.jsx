@@ -6,6 +6,7 @@ import MediaSection from '../components/MediaSection';
 import AudiobookSection from '../components/AudiobookSection';
 import ShortFilmSection from '../components/ShortFilmSection';
 import DigitalBookViewer from '../components/DigitalBook/DigitalBookViewer';
+import PainAlbumSection from '../components/PainAlbumSection';
 import { Video, Music, Sparkles, ArrowDown, Lock } from 'lucide-react';
 
 /**
@@ -87,8 +88,8 @@ export default function Landing() {
               </motion.div>
             </header>
 
-            {/* Generic Hero Section - Only shown for MUSIC or when no specific immersive experience is active */}
-            {mediaContent?.type === 'MUSIC' && (
+            {/* Generic Hero Section - Only shown for MUSIC or when no specific immersive experience is active and not PAIN passcode */}
+            {mediaContent?.type === 'MUSIC' && passcode?.toUpperCase() !== 'PAIN' && (
               <section className="relative w-full py-24 overflow-hidden ">
                 {/* Background decorations */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -192,7 +193,9 @@ export default function Landing() {
             )}
 
             {/* Experience Dispatcher */}
-            {mediaContent?.type === 'AUDIOBOOK' ? (
+            {passcode?.toUpperCase() === 'PAIN' ? (
+              <PainAlbumSection initialContent={mediaContent} />
+            ) : mediaContent?.type === 'AUDIOBOOK' ? (
               <AudiobookSection initialContent={mediaContent} passcode={passcode} />
             ) : mediaContent?.type === 'SHORT_FILM' ? (
               <ShortFilmSection initialContent={mediaContent} passcode={passcode} />

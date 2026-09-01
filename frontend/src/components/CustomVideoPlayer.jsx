@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId, seekTrigger }) {
+export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId, seekTrigger, audioOnlyMode = false, coverNode = null }) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
@@ -134,6 +134,8 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                         onStateChange: (event) => {
                             if (event.data === window.YT.PlayerState.PLAYING) {
                                 setIsPlaying(true);
+                                // Enforce quality immediately when playback starts
+                                event.target.setPlaybackQuality('hd1080');
                             } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
                                 setIsPlaying(false);
                             }
@@ -165,6 +167,50 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
             }
         };
     }, [videoId, isYouTube]);
+
+    // Aggressive Quality Enforcer Loop
+    useEffect(() => {
+        if (!isYouTube || !isReady) return;
+        
+        // This loop aggressively tells YouTube to upgrade the stream
+        const enforceInterval = setInterval(() => {
+            if (playerRef.current && isPlaying) {
+                try {
+                    const currentQ = playerRef.current.getPlaybackQuality();
+                    if (currentQ !== 'hd1080' && currentQ !== 'highres' && currentQ !== 'hd720') {
+                        playerRef.current.setPlaybackQuality('hd1080');
+                    }
+                } catch (e) {}
+            }
+        }, 3000);
+        
+        return () => clearInterval(enforceInterval);
+    }, [isYouTube, isReady, isPlaying]);
+
+    // Force YouTube ABR to recognize player size changes
+    useEffect(() => {
+        if (!isYouTube || !containerRef.current) return;
+        
+        let observer;
+        if (window.ResizeObserver) {
+            observer = new ResizeObserver((entries) => {
+                for (let entry of entries) {
+                    const { width, height } = entry.contentRect;
+                    if (width > 0 && height > 0 && playerRef.current && playerRef.current.setSize) {
+                        // Explicitly tell YouTube API the new size so it fetches HD streams
+                        playerRef.current.setSize(width, height);
+                        // Re-request high quality on resize
+                        playerRef.current.setPlaybackQuality('hd1080');
+                    }
+                }
+            });
+            observer.observe(containerRef.current);
+        }
+        
+        return () => {
+            if (observer) observer.disconnect();
+        };
+    }, [isYouTube, isReady]);
 
     // Persistence Logic
     const storageKey = passcode && contentId ? `playback_${passcode}_${contentId}` : null;
@@ -469,18 +515,27 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
             style={{ cursor: (showControls || !isPlaying) ? 'default' : 'none' }}
         >
             {/* Player Container */}
-            {isYouTube ? (
-                <div
-                    ref={playerDivRef}
-                    className="absolute inset-0 w-full h-full"
-                />
-            ) : (
-                <video
-                    ref={nativeVideoRef}
-                    src={videoUrl}
-                    className="absolute inset-0 w-full h-full object-contain"
-                    playsInline
-                />
+            <div className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${audioOnlyMode ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                {isYouTube ? (
+                    <div
+                        ref={playerDivRef}
+                        className="absolute inset-0 w-full h-full"
+                    />
+                ) : (
+                    <video
+                        ref={nativeVideoRef}
+                        src={videoUrl}
+                        className="absolute inset-0 w-full h-full object-contain"
+                        playsInline
+                    />
+                )}
+            </div>
+
+            {/* Audio Only Cover Overlay */}
+            {audioOnlyMode && coverNode && (
+                <div className="absolute inset-0 z-[5] flex items-center justify-center bg-[#121212] overflow-hidden pointer-events-none">
+                    {coverNode}
+                </div>
             )}
 
             {/* Overlay to block default UI and capture clicks */}
