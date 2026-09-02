@@ -109,11 +109,18 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                         disablekb: 1,
                         fs: 0,
                         playsinline: 1,
+                        cc_load_policy: 0,
                     },
                     events: {
                         onReady: (event) => {
                             setIsReady(true);
                             event.target.setVolume(volume);
+
+                            // Force captions off
+                            try {
+                                event.target.unloadModule("captions");
+                                event.target.unloadModule("cc");
+                            } catch (e) { }
 
                             // Set default quality levels (YouTube standard qualities)
                             const defaultQualities = ['auto', 'hd1080', 'hd720', 'large', 'medium', 'small'];
@@ -171,7 +178,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
     // Aggressive Quality Enforcer Loop
     useEffect(() => {
         if (!isYouTube || !isReady) return;
-        
+
         // This loop aggressively tells YouTube to upgrade the stream
         const enforceInterval = setInterval(() => {
             if (playerRef.current && isPlaying) {
@@ -180,17 +187,17 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                     if (currentQ !== 'hd1080' && currentQ !== 'highres' && currentQ !== 'hd720') {
                         playerRef.current.setPlaybackQuality('hd1080');
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
         }, 3000);
-        
+
         return () => clearInterval(enforceInterval);
     }, [isYouTube, isReady, isPlaying]);
 
     // Force YouTube ABR to recognize player size changes
     useEffect(() => {
         if (!isYouTube || !containerRef.current) return;
-        
+
         let observer;
         if (window.ResizeObserver) {
             observer = new ResizeObserver((entries) => {
@@ -206,7 +213,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
             });
             observer.observe(containerRef.current);
         }
-        
+
         return () => {
             if (observer) observer.disconnect();
         };
@@ -538,10 +545,12 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                 </div>
             )}
 
-            {/* Overlay to block default UI and capture clicks */}
+            {/* Full Protective Shield: Blocks all YT UI (Share, Logo, Right-Click) and captures clicks for custom play/pause */}
             <div
                 className="absolute inset-0 z-10"
                 onClick={togglePlay}
+                onContextMenu={(e) => e.preventDefault()}
+                style={{ cursor: 'pointer' }}
             />
 
             {/* Custom Controls */}
@@ -555,21 +564,37 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                     >
                         {/* Progress Bar */}
                         <div className="mb-3 landscape:mb-1">
-                            <div
-                                className="relative w-full h-1 bg-white/20 rounded-full cursor-pointer group/progress"
-                                onClick={handleSeek}
-                            >
-                                {/* Progress */}
+                            <div className="relative w-full h-2 flex items-center group/progress">
+                                {/* Track Background */}
+                                <div className="absolute left-0 right-0 h-1 bg-white/20 rounded-full pointer-events-none" />
+                                {/* Progress Fill */}
                                 <div
-                                    className="absolute top-0 left-0 h-full bg-[#ff6b35] rounded-full transition-all"
+                                    className="absolute left-0 h-1 bg-[#ff6b35] rounded-full pointer-events-none transition-all duration-75"
                                     style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
                                 />
                                 {/* Hover effect */}
-                                <div className="absolute inset-0 h-full bg-white/10 rounded-full opacity-0 group-hover/progress:opacity-100 transition-opacity" />
+                                <div className="absolute left-0 right-0 h-1 bg-white/10 rounded-full opacity-0 group-hover/progress:opacity-100 transition-opacity pointer-events-none" />
+                                {/* Native Range Input (Draggable) */}
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max={duration || 100}
+                                    value={currentTime || 0}
+                                    onChange={(e) => {
+                                        const time = parseFloat(e.target.value);
+                                        setCurrentTime(time);
+                                        playerAdapter.seekTo(time);
+                                    }}
+                                    onMouseDown={() => setIsSeeking(true)}
+                                    onMouseUp={() => setIsSeeking(false)}
+                                    onTouchStart={() => setIsSeeking(true)}
+                                    onTouchEnd={() => setIsSeeking(false)}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 m-0"
+                                />
                                 {/* Scrubber */}
                                 <div
-                                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg opacity-0 group-hover/progress:opacity-100 transition-opacity"
-                                    style={{ left: `${duration > 0 ? (currentTime / duration) * 100 : 0}%`, transform: 'translate(-50%, -50%)' }}
+                                    className="absolute h-3 w-3 bg-white rounded-full shadow-lg opacity-0 group-hover/progress:opacity-100 transition-opacity pointer-events-none"
+                                    style={{ left: `calc(${duration > 0 ? (currentTime / duration) * 100 : 0}% - 6px)` }}
                                 />
                             </div>
                             {/* Time Display */}
@@ -613,20 +638,27 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                                         </svg>
                                     )}
                                 </button>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="100"
-                                    value={isMuted ? 0 : volume}
-                                    onChange={handleVolumeChange}
-                                    className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
-                                />
+                                {/* Volume Control (Hidden on mobile as OS controls volume) */}
+                                <div
+                                    className="relative hidden sm:flex items-center gap-2 group/volume"
+                                    onMouseEnter={() => setShowVolume(true)}
+                                    onMouseLeave={() => setShowVolume(false)}
+                                >
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="100"
+                                        value={isMuted ? 0 : volume}
+                                        onChange={handleVolumeChange}
+                                        className="w-20 h-1 bg-white/30 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+                                    />
+                                </div>
                             </div>
 
                             <div className="flex-1" />
 
                             {/* Quality Selector (YT Only) */}
-                            {isYouTube && availableQualities.length > 0 && (
+                            {isYouTube && !audioOnlyMode && availableQualities.length > 0 && (
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowQuality(!showQuality)}
@@ -637,19 +669,31 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                                     <AnimatePresence>
                                         {showQuality && (
                                             <motion.div
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: 10 }}
-                                                className="absolute bottom-full mb-2 right-0 bg-black/90 backdrop-blur-sm rounded-lg overflow-hidden min-w-[100px]"
+                                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                                className="absolute bottom-full right-0 mb-4 bg-black/80 backdrop-blur-md rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.5)] border border-white/10 overflow-y-auto max-h-[120px] md:max-h-[250px] min-w-[100px] md:min-w-[120px] flex flex-col z-[100] hide-scrollbar"
                                             >
-                                                {availableQualities.map((quality) => (
+                                                {['auto', ...availableQualities.filter(q => q !== 'auto' && q !== 'unknown')].map((quality) => (
                                                     <button
                                                         key={quality}
                                                         onClick={() => handleQualityChange(quality)}
-                                                        className={`w-full px-4 py-2 text-left text-sm hover:bg-white/20 transition ${currentQuality === quality ? 'text-[#ff6b35]' : 'text-white'
+                                                        className={`w-full px-3 py-2 md:px-4 md:py-2.5 text-left text-xs md:text-sm font-medium transition-colors flex items-center gap-2 ${currentQuality === quality ? 'text-[#ff6b35] bg-white/5' : 'text-gray-300 hover:text-white hover:bg-white/10'
                                                             }`}
                                                     >
-                                                        {quality === 'auto' ? 'Auto' : quality.toUpperCase()}
+                                                        {currentQuality === quality && <span className="text-[#ff6b35] text-[10px]">●</span>}
+                                                        <span className={currentQuality !== quality ? 'ml-3 md:ml-4' : ''}>
+                                                            {quality === 'hd2160' ? '4K' :
+                                                                quality === 'hd1440' ? '1440p' :
+                                                                    quality === 'hd1080' ? '1080p' :
+                                                                        quality === 'highres' ? 'Highest' :
+                                                                            quality === 'hd720' ? '720p' :
+                                                                                quality === 'large' ? '480p' :
+                                                                                    quality === 'medium' ? '360p' :
+                                                                                        quality === 'small' ? '240p' :
+                                                                                            quality === 'tiny' ? '144p' :
+                                                                                                quality === 'auto' ? 'Auto' : 'Unknown'}
+                                                        </span>
                                                     </button>
                                                 ))}
                                             </motion.div>
@@ -659,20 +703,22 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                             )}
 
                             {/* Fullscreen Button */}
-                            <button
-                                onClick={toggleFullscreen}
-                                className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition"
-                            >
-                                {isFullscreen ? (
-                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
-                                    </svg>
-                                ) : (
-                                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
-                                    </svg>
-                                )}
-                            </button>
+                            {!audioOnlyMode && (
+                                <button
+                                    onClick={toggleFullscreen}
+                                    className="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition"
+                                >
+                                    {isFullscreen ? (
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z" />
+                                        </svg>
+                                    ) : (
+                                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z" />
+                                        </svg>
+                                    )}
+                                </button>
+                            )}
                         </div>
                     </motion.div>
                 )}
