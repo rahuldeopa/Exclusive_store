@@ -145,8 +145,13 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                                 setIsPlaying(true);
                                 // Enforce quality immediately when playback starts
                                 event.target.setPlaybackQuality('hd1080');
-                            } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
+                            } else if (event.data === window.YT.PlayerState.PAUSED) {
                                 setIsPlaying(false);
+                            } else if (event.data === window.YT.PlayerState.ENDED) {
+                                setIsPlaying(false);
+                                // Prevent YouTube's "More Videos" screen by resetting the player
+                                event.target.seekTo(0);
+                                event.target.stopVideo();
                             }
                         },
                     },
