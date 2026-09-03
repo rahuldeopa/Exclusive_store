@@ -204,29 +204,32 @@ export default function PainAlbumSection({ initialContent }) {
             </div>
 
             {/* Toggle */}
-            <div className="flex justify-center mb-4 md:mb-8">
-              <div className="flex bg-black/50 rounded-full p-1 gap-1">
-                <button
-                  onClick={() => setPlayerMode('audio')}
-                  className={`px-8 py-2 rounded-full text-sm font-semibold transition-colors ${playerMode === 'audio' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
-                >
-                  Audio
-                </button>
-                <button
-                  onClick={() => setPlayerMode('video')}
-                  className={`px-8 py-2 rounded-full text-sm font-semibold transition-colors ${playerMode === 'video' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
-                >
-                  Video
-                </button>
+            {getMediaForTrack(activeTrack.title)?.source !== 'YOUTUBE' && (
+              <div className="flex justify-center mb-4 md:mb-8">
+                <div className="flex bg-black/50 rounded-full p-1 gap-1">
+                  <button
+                    onClick={() => setPlayerMode('audio')}
+                    className={`px-8 py-2 rounded-full text-sm font-semibold transition-colors ${playerMode === 'audio' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    Audio
+                  </button>
+                  <button
+                    onClick={() => setPlayerMode('video')}
+                    className={`px-8 py-2 rounded-full text-sm font-semibold transition-colors ${playerMode === 'video' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    Video
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Player Area */}
             <div className="flex-1 flex flex-col items-center justify-start px-4 md:px-6 pb-8 md:pb-12 max-w-6xl mx-auto w-full overflow-y-auto mobile-landscape-container">
               <motion.div
                 layout
-                className={`w-full bg-black rounded-xl overflow-visible shadow-2xl relative transition-all duration-500 flex-shrink-0 mobile-landscape-full ${playerMode === 'audio' ? 'max-w-md aspect-square' : 'max-w-5xl aspect-video'
-                  }`}
+                className={`w-full bg-black rounded-xl overflow-visible shadow-2xl relative transition-all duration-500 flex-shrink-0 mobile-landscape-full ${
+                  (playerMode === 'audio' && getMediaForTrack(activeTrack.title)?.source !== 'YOUTUBE') ? 'max-w-md aspect-square' : 'max-w-5xl aspect-video'
+                }`}
               >
                 {(() => {
                   const media = getMediaForTrack(activeTrack.title);
@@ -273,7 +276,9 @@ export default function PainAlbumSection({ initialContent }) {
                 })()}
             </motion.div>
             
-            <div className={`w-full mt-6 md:mt-12 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-500 ${playerMode === 'audio' ? 'max-w-md' : 'max-w-5xl'}`}>
+            <div className={`w-full mt-6 md:mt-12 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-500 ${
+              (playerMode === 'audio' && getMediaForTrack(activeTrack.title)?.source !== 'YOUTUBE') ? 'max-w-md' : 'max-w-5xl'
+            }`}>
               <div className="flex flex-col items-start">
                 <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-md">{activeTrack.title}</h2>
                 <p className="text-lg text-gray-300 drop-shadow">{activeTrack.credits}</p>
