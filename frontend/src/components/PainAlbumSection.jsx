@@ -231,25 +231,40 @@ export default function PainAlbumSection({ initialContent }) {
                 {(() => {
                   const media = getMediaForTrack(activeTrack.title);
                   if (media && media.source === 'YOUTUBE') {
-                    return (
-                      <CustomVideoPlayer
-                        videoUrl={`https://www.youtube.com/watch?v=${media.youtubeId}`}
-                        title={activeTrack.title}
-                        audioOnlyMode={playerMode === 'audio'}
-                        coverNode={
-                          <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center border-4 border-black relative">
-                            <div className="absolute top-[5%] text-black font-black text-2xl tracking-tighter">TURNING</div>
-                            <div className="absolute top-[25%] text-black font-medium text-lg">MY</div>
-                            <div className="absolute top-[40%] text-black font-black text-5xl md:text-7xl tracking-tighter">PAIN</div>
-                            <div className="absolute top-[65%] text-black font-script text-2xl md:text-4xl italic">into</div>
-                            <div className="absolute bottom-[5%] text-black font-black text-3xl md:text-5xl tracking-tighter">PURPOSE</div>
-                            <svg className="absolute bottom-0 right-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-                              <path d="M0 100 L100 0 L100 100 Z" fill="black" />
-                            </svg>
-                          </div>
-                        }
-                      />
-                    );
+                    if (playerMode === 'video') {
+                      return (
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src={`https://www.youtube.com/embed/${media.youtubeId}?autoplay=1&rel=0&cc_load_policy=0&iv_load_policy=3`}
+                          title={activeTrack.title}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full rounded-xl bg-black"
+                        ></iframe>
+                      );
+                    } else {
+                      return (
+                        <CustomVideoPlayer
+                          videoUrl={`https://www.youtube.com/watch?v=${media.youtubeId}`}
+                          title={activeTrack.title}
+                          audioOnlyMode={true}
+                          coverNode={
+                            <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center border-4 border-black relative">
+                              <div className="absolute top-[5%] text-black font-black text-2xl tracking-tighter">TURNING</div>
+                              <div className="absolute top-[25%] text-black font-medium text-lg">MY</div>
+                              <div className="absolute top-[40%] text-black font-black text-5xl md:text-7xl tracking-tighter">PAIN</div>
+                              <div className="absolute top-[65%] text-black font-script text-2xl md:text-4xl italic">into</div>
+                              <div className="absolute bottom-[5%] text-black font-black text-3xl md:text-5xl tracking-tighter">PURPOSE</div>
+                              <svg className="absolute bottom-0 right-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <path d="M0 100 L100 0 L100 100 Z" fill="black" />
+                              </svg>
+                            </div>
+                          }
+                        />
+                      );
+                    }
                   } else if (media && (media.playUrl || media.url)) {
                     if (playerMode === 'video') {
                       return <div className="w-full h-full flex items-center justify-center text-gray-500">No video available for this track</div>;
