@@ -13,7 +13,8 @@ router.get('/youtube', async (req, res) => {
   const { id, type } = req.query;
 
   if (!id || typeof id !== 'string') {
-    return res.status(400).json({ error: 'YouTube ID is required' });
+    res.status(400).json({ error: 'YouTube ID is required' });
+    return;
   }
 
   const url = `https://www.youtube.com/watch?v=${id}`;
@@ -87,7 +88,10 @@ router.get('/youtube', async (req, res) => {
 
 router.get('/stream', async (req, res) => {
   const { id } = req.query;
-  if (!id || typeof id !== 'string') return res.status(400).json({ error: 'YouTube ID is required' });
+  if (!id || typeof id !== 'string') {
+    res.status(400).json({ error: 'YouTube ID is required' });
+    return;
+  }
 
   const url = `https://www.youtube.com/watch?v=${id}`;
   
@@ -103,7 +107,7 @@ router.get('/stream', async (req, res) => {
         output: tempFilePath,
         ffmpegLocation: ffmpegPath || undefined,
         noWarnings: true
-      });
+      } as any);
       
       // Auto-delete the cache file after 1 hour to prevent disk space issues
       setTimeout(() => {
