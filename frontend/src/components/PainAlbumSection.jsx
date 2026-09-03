@@ -204,47 +204,51 @@ export default function PainAlbumSection({ initialContent }) {
             </div>
 
             {/* Toggle */}
-            {getMediaForTrack(activeTrack.title)?.source !== 'YOUTUBE' && (
-              <div className="flex justify-center mb-4 md:mb-8">
-                <div className="flex bg-black/50 rounded-full p-1 gap-1">
-                  <button
-                    onClick={() => setPlayerMode('audio')}
-                    className={`px-8 py-2 rounded-full text-sm font-semibold transition-colors ${playerMode === 'audio' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
-                  >
-                    Audio
-                  </button>
-                  <button
-                    onClick={() => setPlayerMode('video')}
-                    className={`px-8 py-2 rounded-full text-sm font-semibold transition-colors ${playerMode === 'video' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
-                  >
-                    Video
-                  </button>
-                </div>
+            <div className="flex justify-center mb-4 md:mb-8">
+              <div className="flex bg-black/50 rounded-full p-1 gap-1">
+                <button
+                  onClick={() => setPlayerMode('audio')}
+                  className={`px-8 py-2 rounded-full text-sm font-semibold transition-colors ${playerMode === 'audio' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+                >
+                  Audio
+                </button>
+                <button
+                  onClick={() => setPlayerMode('video')}
+                  className={`px-8 py-2 rounded-full text-sm font-semibold transition-colors ${playerMode === 'video' ? 'bg-white text-black' : 'text-gray-400 hover:text-white'}`}
+                >
+                  Video
+                </button>
               </div>
-            )}
+            </div>
 
             {/* Player Area */}
             <div className="flex-1 flex flex-col items-center justify-start px-4 md:px-6 pb-8 md:pb-12 max-w-6xl mx-auto w-full overflow-y-auto mobile-landscape-container">
               <motion.div
                 layout
-                className={`w-full bg-black rounded-xl overflow-visible shadow-2xl relative transition-all duration-500 flex-shrink-0 mobile-landscape-full ${
-                  (playerMode === 'audio' && getMediaForTrack(activeTrack.title)?.source !== 'YOUTUBE') ? 'max-w-md aspect-square' : 'max-w-5xl aspect-video'
-                }`}
+                className={`w-full bg-black rounded-xl overflow-visible shadow-2xl relative transition-all duration-500 flex-shrink-0 mobile-landscape-full ${playerMode === 'audio' ? 'max-w-md aspect-square' : 'max-w-5xl aspect-video'
+                  }`}
               >
                 {(() => {
                   const media = getMediaForTrack(activeTrack.title);
                   if (media && media.source === 'YOUTUBE') {
                     return (
-                      <iframe
-                        width="100%"
-                        height="100%"
-                        src={`https://www.youtube.com/embed/${media.youtubeId}?autoplay=1`}
+                      <CustomVideoPlayer
+                        videoUrl={`https://www.youtube.com/watch?v=${media.youtubeId}`}
                         title={activeTrack.title}
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="w-full h-full rounded-xl bg-black"
-                      ></iframe>
+                        audioOnlyMode={playerMode === 'audio'}
+                        coverNode={
+                          <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center border-4 border-black relative">
+                            <div className="absolute top-[5%] text-black font-black text-2xl tracking-tighter">TURNING</div>
+                            <div className="absolute top-[25%] text-black font-medium text-lg">MY</div>
+                            <div className="absolute top-[40%] text-black font-black text-5xl md:text-7xl tracking-tighter">PAIN</div>
+                            <div className="absolute top-[65%] text-black font-script text-2xl md:text-4xl italic">into</div>
+                            <div className="absolute bottom-[5%] text-black font-black text-3xl md:text-5xl tracking-tighter">PURPOSE</div>
+                            <svg className="absolute bottom-0 right-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
+                              <path d="M0 100 L100 0 L100 100 Z" fill="black" />
+                            </svg>
+                          </div>
+                        }
+                      />
                     );
                   } else if (media && (media.playUrl || media.url)) {
                     if (playerMode === 'video') {
@@ -276,9 +280,7 @@ export default function PainAlbumSection({ initialContent }) {
                 })()}
             </motion.div>
             
-            <div className={`w-full mt-6 md:mt-12 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-500 ${
-              (playerMode === 'audio' && getMediaForTrack(activeTrack.title)?.source !== 'YOUTUBE') ? 'max-w-md' : 'max-w-5xl'
-            }`}>
+            <div className={`w-full mt-6 md:mt-12 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-500 ${playerMode === 'audio' ? 'max-w-md' : 'max-w-5xl'}`}>
               <div className="flex flex-col items-start">
                 <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-md">{activeTrack.title}</h2>
                 <p className="text-lg text-gray-300 drop-shadow">{activeTrack.credits}</p>
