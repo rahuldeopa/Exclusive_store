@@ -231,25 +231,17 @@ export default function PainAlbumSection({ initialContent }) {
                 {(() => {
                   const media = getMediaForTrack(activeTrack.title);
                   if (media && media.source === 'YOUTUBE') {
-                    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://seasonsforchangeapi.rahuldeopa.dev/api' : 'http://localhost:4000/api');
                     return (
-                      <CustomVideoPlayer
-                        videoUrl={`${apiUrl}/download/stream?id=${media.youtubeId}`}
+                      <iframe
+                        width="100%"
+                        height="100%"
+                        src={`https://www.youtube.com/embed/${media.youtubeId}?autoplay=1`}
                         title={activeTrack.title}
-                        audioOnlyMode={playerMode === 'audio'}
-                        coverNode={
-                          <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center border-4 border-black relative">
-                            <div className="absolute top-[5%] text-black font-black text-2xl tracking-tighter">TURNING</div>
-                            <div className="absolute top-[25%] text-black font-medium text-lg">MY</div>
-                            <div className="absolute top-[40%] text-black font-black text-5xl md:text-7xl tracking-tighter">PAIN</div>
-                            <div className="absolute top-[65%] text-black font-script text-2xl md:text-4xl italic">into</div>
-                            <div className="absolute bottom-[5%] text-black font-black text-3xl md:text-5xl tracking-tighter">PURPOSE</div>
-                            <svg className="absolute bottom-0 right-0 w-full h-full opacity-10" viewBox="0 0 100 100" preserveAspectRatio="none">
-                              <path d="M0 100 L100 0 L100 100 Z" fill="black" />
-                            </svg>
-                          </div>
-                        }
-                      />
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full rounded-xl bg-black"
+                      ></iframe>
                     );
                   } else if (media && (media.playUrl || media.url)) {
                     if (playerMode === 'video') {
@@ -287,36 +279,9 @@ export default function PainAlbumSection({ initialContent }) {
                 <p className="text-lg text-gray-300 drop-shadow">{activeTrack.credits}</p>
               </div>
               <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-                <button
-                  onClick={() => {
-                    if (activeTrack.youtubeId) {
-                      const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://seasonsforchangeapi.rahuldeopa.dev/api' : 'http://localhost:4000/api');
-                      const downloadUrl = `${apiUrl}/download/youtube?id=${activeTrack.youtubeId}&type=audio`;
-                      window.location.href = downloadUrl;
-                    } else {
-                      alert('No YouTube source available to download audio.');
-                    }
-                  }}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors border border-white/10"
-                >
-                  <Download className="w-4 h-4" />
-                  Audio
-                </button>
-                <button
-                  onClick={() => {
-                    if (activeTrack.youtubeId) {
-                      const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://seasonsforchangeapi.rahuldeopa.dev/api' : 'http://localhost:4000/api');
-                      const downloadUrl = `${apiUrl}/download/youtube?id=${activeTrack.youtubeId}&type=video`;
-                      window.location.href = downloadUrl;
-                    } else {
-                      alert('No YouTube source available to download video.');
-                    }
-                  }}
-                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors border border-white/10"
-                >
-                  <Download className="w-4 h-4" />
-                  Video
-                </button>
+                {/* 
+                  Download buttons temporarily parked due to Vercel IP blocking issues with YouTube
+                */}
               </div>
             </div>
           </div>
