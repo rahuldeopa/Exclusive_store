@@ -7,6 +7,11 @@ import fs from 'fs';
 
 const router = Router();
 
+// Create an agent using mobile clients to bypass YouTube's strict data center bot checks
+const agent = ytdl.createAgent(undefined, {
+  clients: ['ANDROID', 'IOS']
+});
+
 router.get('/youtube', async (req, res) => {
   const { id, type } = req.query;
 
@@ -19,7 +24,7 @@ router.get('/youtube', async (req, res) => {
   const isAudio = type === 'audio';
 
   try {
-    const info = await ytdl.getInfo(url);
+    const info = await ytdl.getInfo(url, { agent });
     const title = info.videoDetails.title.replace(/[^\w\s-]/gi, '_').trim();
     
     const ext = isAudio ? 'mp3' : 'mp4';
@@ -33,7 +38,7 @@ router.get('/youtube', async (req, res) => {
       filter: isAudio ? 'audioonly' : 'audioandvideo'
     });
 
-    const stream = ytdl(url, { format });
+    const stream = ytdl(url, { format, agent });
     stream.pipe(res);
 
     stream.on('error', (err: any) => {
@@ -72,11 +77,11 @@ router.get('/stream', async (req, res) => {
 
     if (!fs.existsSync(tempFilePath)) {
       console.log(`Downloading ${id} for streaming cache...`);
-      const info = await ytdl.getInfo(url);
+      const info = await ytdl.getInfo(url, { agent });
       const format = ytdl.chooseFormat(info.formats, { quality: 'highest', filter: 'audioandvideo' });
       
       await new Promise<void>((resolve, reject) => {
-        const stream = ytdl(url, { format });
+        const stream = ytdl(url, { format, agent });
         const writeStream = fs.createWriteStream(tempFilePath);
         stream.pipe(writeStream);
         writeStream.on('finish', () => resolve());
