@@ -231,7 +231,7 @@ export default function PainAlbumSection({ initialContent }) {
                 {(() => {
                   const media = getMediaForTrack(activeTrack.title);
                   if (media && media.source === 'YOUTUBE') {
-                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+                    const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://seasonsforchangeapi.rahuldeopa.dev/api' : 'http://localhost:4000/api');
                     return (
                       <CustomVideoPlayer
                         videoUrl={`${apiUrl}/download/stream?id=${media.youtubeId}`}
@@ -290,7 +290,7 @@ export default function PainAlbumSection({ initialContent }) {
                 <button
                   onClick={() => {
                     if (activeTrack.youtubeId) {
-                      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+                      const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://seasonsforchangeapi.rahuldeopa.dev/api' : 'http://localhost:4000/api');
                       const downloadUrl = `${apiUrl}/download/youtube?id=${activeTrack.youtubeId}&type=audio`;
                       window.location.href = downloadUrl;
                     } else {
@@ -305,7 +305,7 @@ export default function PainAlbumSection({ initialContent }) {
                 <button
                   onClick={() => {
                     if (activeTrack.youtubeId) {
-                      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+                      const apiUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://seasonsforchangeapi.rahuldeopa.dev/api' : 'http://localhost:4000/api');
                       const downloadUrl = `${apiUrl}/download/youtube?id=${activeTrack.youtubeId}&type=video`;
                       window.location.href = downloadUrl;
                     } else {
