@@ -10,7 +10,7 @@ const router = Router();
 // Create an agent using mobile clients to bypass YouTube's strict data center bot checks
 const agent = ytdl.createAgent(undefined, {
   clients: ['ANDROID', 'IOS']
-});
+} as any);
 
 router.get('/youtube', async (req, res) => {
   const { id, type } = req.query;
