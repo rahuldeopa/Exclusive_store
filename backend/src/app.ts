@@ -22,12 +22,14 @@ app.use(cors({
 app.use(express.json());
 
 import bookRoutes from './routes/book.routes';
+import downloadRoutes from './routes/download.routes';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/book', bookRoutes);
+app.use('/api/download', downloadRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

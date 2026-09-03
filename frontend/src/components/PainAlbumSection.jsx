@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomVideoPlayer from './CustomVideoPlayer';
 import CustomAudioPlayer from './CustomAudioPlayer';
-import { Play, Pause, Clock, Info, ChevronDown } from 'lucide-react';
+import { Play, Pause, Clock, Info, ChevronDown, Download } from 'lucide-react';
 
 export default function PainAlbumSection({ initialContent }) {
   const [activeTrack, setActiveTrack] = useState(null);
@@ -231,9 +231,10 @@ export default function PainAlbumSection({ initialContent }) {
                 {(() => {
                   const media = getMediaForTrack(activeTrack.title);
                   if (media && media.source === 'YOUTUBE') {
+                    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
                     return (
                       <CustomVideoPlayer
-                        videoUrl={`https://www.youtube.com/watch?v=${media.youtubeId}`}
+                        videoUrl={`${apiUrl}/download/stream?id=${media.youtubeId}`}
                         title={activeTrack.title}
                         audioOnlyMode={playerMode === 'audio'}
                         coverNode={
@@ -280,9 +281,43 @@ export default function PainAlbumSection({ initialContent }) {
                 })()}
             </motion.div>
             
-            <div className={`w-full mt-6 md:mt-12 flex flex-col items-start transition-all duration-500 ${playerMode === 'audio' ? 'max-w-md' : 'max-w-5xl'}`}>
-              <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-md">{activeTrack.title}</h2>
-              <p className="text-lg text-gray-300 drop-shadow">{activeTrack.credits}</p>
+            <div className={`w-full mt-6 md:mt-12 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-500 ${playerMode === 'audio' ? 'max-w-md' : 'max-w-5xl'}`}>
+              <div className="flex flex-col items-start">
+                <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-md">{activeTrack.title}</h2>
+                <p className="text-lg text-gray-300 drop-shadow">{activeTrack.credits}</p>
+              </div>
+              <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
+                <button
+                  onClick={() => {
+                    if (activeTrack.youtubeId) {
+                      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+                      const downloadUrl = `${apiUrl}/download/youtube?id=${activeTrack.youtubeId}&type=audio`;
+                      window.location.href = downloadUrl;
+                    } else {
+                      alert('No YouTube source available to download audio.');
+                    }
+                  }}
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors border border-white/10"
+                >
+                  <Download className="w-4 h-4" />
+                  Audio
+                </button>
+                <button
+                  onClick={() => {
+                    if (activeTrack.youtubeId) {
+                      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
+                      const downloadUrl = `${apiUrl}/download/youtube?id=${activeTrack.youtubeId}&type=video`;
+                      window.location.href = downloadUrl;
+                    } else {
+                      alert('No YouTube source available to download video.');
+                    }
+                  }}
+                  className="flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-semibold transition-colors border border-white/10"
+                >
+                  <Download className="w-4 h-4" />
+                  Video
+                </button>
+              </div>
             </div>
           </div>
           </div>

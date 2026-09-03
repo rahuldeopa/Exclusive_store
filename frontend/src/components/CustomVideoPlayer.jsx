@@ -14,6 +14,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [isSeeking, setIsSeeking] = useState(false);
+    const [isBuffering, setIsBuffering] = useState(true);
 
     const playerRef = useRef(null); // For YT instance
     const containerRef = useRef(null);
@@ -110,6 +111,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                         fs: 0,
                         playsinline: 1,
                         cc_load_policy: 0,
+                        vq: 'hd1080',
                     },
                     events: {
                         onReady: (event) => {
@@ -194,29 +196,25 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
         return () => clearInterval(enforceInterval);
     }, [isYouTube, isReady, isPlaying]);
 
-    // Force YouTube ABR to recognize player size changes
+    // ABR Exploit: Lie to YouTube about player size to force 1080p
     useEffect(() => {
-        if (!isYouTube || !containerRef.current) return;
+        if (!isYouTube || !isReady) return;
 
-        let observer;
-        if (window.ResizeObserver) {
-            observer = new ResizeObserver((entries) => {
-                for (let entry of entries) {
-                    const { width, height } = entry.contentRect;
-                    if (width > 0 && height > 0 && playerRef.current && playerRef.current.setSize) {
-                        // Explicitly tell YouTube API the new size so it fetches HD streams
-                        playerRef.current.setSize(width, height);
-                        // Re-request high quality on resize
-                        playerRef.current.setPlaybackQuality('hd1080');
-                    }
-                }
-            });
-            observer.observe(containerRef.current);
-        }
+        const fakeSizeInterval = setInterval(() => {
+            if (playerRef.current && playerRef.current.setSize) {
+                // By forcing the API to believe the player is massive (1920x1080), 
+                // YouTube's ABR algorithm is forced to serve the 1080p stream
+                // regardless of the actual CSS rendering size on the screen.
+                playerRef.current.setSize(1920, 1080);
+                
+                // Repeatedly ping the quality enforcer too
+                try {
+                    playerRef.current.setPlaybackQuality('hd1080');
+                } catch(e) {}
+            }
+        }, 2000);
 
-        return () => {
-            if (observer) observer.disconnect();
-        };
+        return () => clearInterval(fakeSizeInterval);
     }, [isYouTube, isReady]);
 
     // Persistence Logic
@@ -287,16 +285,23 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
         const onLoaded = () => {
             setDuration(video.duration || 0);
             setIsReady(true);
+            setIsBuffering(false);
             // Sync initial volume
             video.volume = volume / 100;
             video.muted = isMuted;
         };
+        const onWaiting = () => setIsBuffering(true);
+        const onPlaying = () => setIsBuffering(false);
+        const onCanPlay = () => setIsBuffering(false);
 
         video.addEventListener('timeupdate', updateTime);
         video.addEventListener('play', onPlay);
         video.addEventListener('pause', onPause);
         video.addEventListener('ended', onEnded);
         video.addEventListener('loadedmetadata', onLoaded);
+        video.addEventListener('waiting', onWaiting);
+        video.addEventListener('playing', onPlaying);
+        video.addEventListener('canplay', onCanPlay);
 
         return () => {
             video.removeEventListener('timeupdate', updateTime);
@@ -304,6 +309,9 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
             video.removeEventListener('pause', onPause);
             video.removeEventListener('ended', onEnded);
             video.removeEventListener('loadedmetadata', onLoaded);
+            video.removeEventListener('waiting', onWaiting);
+            video.removeEventListener('playing', onPlaying);
+            video.removeEventListener('canplay', onCanPlay);
         };
     }, [isYouTube, isSeeking]);
 
@@ -542,6 +550,17 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
             {audioOnlyMode && coverNode && (
                 <div className="absolute inset-0 z-[5] flex items-center justify-center bg-[#121212] overflow-hidden pointer-events-none">
                     {coverNode}
+                </div>
+            )}
+
+            {/* Honest Loader for Native Video (Proxy) */}
+            {!isYouTube && isBuffering && (
+                <div className="absolute inset-0 z-[15] flex items-center justify-center bg-black/80 pointer-events-none">
+                    <div className="flex flex-col items-center">
+                        <div className="w-12 h-12 border-4 border-[#ff6b35] border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(255,107,53,0.5)]"></div>
+                        <p className="text-white mt-5 font-bold text-sm tracking-widest drop-shadow-md">PREPARING HD STREAM</p>
+                        <p className="text-gray-400 text-xs mt-2 font-medium">(This takes ~10 seconds to merge tracks)</p>
+                    </div>
                 </div>
             )}
 
