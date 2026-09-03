@@ -78,10 +78,12 @@ router.get('/youtube', async (req, res) => {
       fs.unlink(tempFilePath, () => {});
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error downloading YouTube media:', error);
     if (!res.headersSent) {
-      res.status(500).json({ error: 'Failed to download media' });
+      res.removeHeader('Content-Disposition');
+      res.removeHeader('Content-Type');
+      res.status(500).json({ error: 'Failed to download media', details: error.message || String(error) });
     }
   }
 });
@@ -122,9 +124,12 @@ router.get('/stream', async (req, res) => {
     // Using sendFile enables Express to handle Range requests for seeking automatically!
     res.sendFile(tempFilePath);
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error streaming YouTube media:', error);
-    if (!res.headersSent) res.status(500).json({ error: 'Failed to stream media' });
+    if (!res.headersSent) {
+      res.removeHeader('Content-Type');
+      res.status(500).json({ error: 'Failed to stream media', details: error.message || String(error) });
+    }
   }
 });
 
