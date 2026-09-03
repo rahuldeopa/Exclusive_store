@@ -27,7 +27,8 @@ router.get('/youtube', async (req, res) => {
         noCheckCertificates: true,
         noWarnings: true,
         preferFreeFormats: true,
-      });
+        extractorArgs: 'youtube:player_client=ios,android',
+      } as any);
       if (info && (info as any).title) {
         title = (info as any).title.replace(/[^\w\s-]/gi, '_').trim();
       }
@@ -47,7 +48,8 @@ router.get('/youtube', async (req, res) => {
       f: isAudio ? 'bestaudio' : 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
       output: tempFilePath,
       ffmpegLocation: ffmpegPath || undefined,
-      noWarnings: true
+      noWarnings: true,
+      extractorArgs: 'youtube:player_client=ios,android'
     };
 
     if (isAudio) {
@@ -107,7 +109,8 @@ router.get('/stream', async (req, res) => {
         f: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
         output: tempFilePath,
         ffmpegLocation: ffmpegPath || undefined,
-        noWarnings: true
+        noWarnings: true,
+        extractorArgs: 'youtube:player_client=ios,android'
       } as any);
       
       // Auto-delete the cache file after 1 hour to prevent disk space issues
