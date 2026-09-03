@@ -20,15 +20,28 @@ router.get('/youtube', async (req, res) => {
   const isAudio = type === 'audio';
 
   try {
+    let cookiesPath: string | undefined;
+    if (process.env.YOUTUBE_COOKIES) {
+      cookiesPath = path.join(os.tmpdir(), `youtube-cookies-${randomUUID()}.txt`);
+      fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES.replace(/\\n/g, '\n'));
+    }
+
     let title = 'media';
     try {
-      const info = await youtubedl(url, {
+      const infoOpts: any = {
         dumpSingleJson: true,
         noCheckCertificates: true,
         noWarnings: true,
         preferFreeFormats: true,
-        extractorArgs: 'youtube:player_client=ios,android',
-      } as any);
+      };
+      
+      if (cookiesPath) {
+        infoOpts.cookies = cookiesPath;
+      } else {
+        infoOpts.extractorArgs = 'youtube:player_client=ios,android';
+      }
+
+      const info = await youtubedl(url, infoOpts);
       if (info && (info as any).title) {
         title = (info as any).title.replace(/[^\w\s-]/gi, '_').trim();
       }
@@ -44,22 +57,17 @@ router.get('/youtube', async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', isAudio ? 'audio/wav' : 'video/mp4');
 
-    let cookiesPath: string | undefined;
-    if (process.env.YOUTUBE_COOKIES) {
-      cookiesPath = path.join(os.tmpdir(), `youtube-cookies-${randomUUID()}.txt`);
-      fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES);
-    }
-
     const options: any = {
       f: isAudio ? 'bestaudio' : 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
       output: tempFilePath,
       ffmpegLocation: ffmpegPath || undefined,
       noWarnings: true,
-      extractorArgs: 'youtube:player_client=ios,android'
     };
 
     if (cookiesPath) {
       options.cookies = cookiesPath;
+    } else {
+      options.extractorArgs = 'youtube:player_client=ios,android';
     }
 
     if (isAudio) {
@@ -124,7 +132,7 @@ router.get('/stream', async (req, res) => {
       let cookiesPath: string | undefined;
       if (process.env.YOUTUBE_COOKIES) {
         cookiesPath = path.join(os.tmpdir(), `youtube-cookies-${randomUUID()}.txt`);
-        fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES);
+        fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES.replace(/\\n/g, '\n'));
       }
 
       const options: any = {
@@ -132,11 +140,12 @@ router.get('/stream', async (req, res) => {
         output: tempFilePath,
         ffmpegLocation: ffmpegPath || undefined,
         noWarnings: true,
-        extractorArgs: 'youtube:player_client=ios,android'
       };
 
       if (cookiesPath) {
         options.cookies = cookiesPath;
+      } else {
+        options.extractorArgs = 'youtube:player_client=ios,android';
       }
 
       await youtubedl(url, options);
