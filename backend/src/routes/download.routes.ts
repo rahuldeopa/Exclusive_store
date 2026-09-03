@@ -44,6 +44,12 @@ router.get('/youtube', async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Content-Type', isAudio ? 'audio/wav' : 'video/mp4');
 
+    let cookiesPath: string | undefined;
+    if (process.env.YOUTUBE_COOKIES) {
+      cookiesPath = path.join(os.tmpdir(), `youtube-cookies-${randomUUID()}.txt`);
+      fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES);
+    }
+
     const options: any = {
       f: isAudio ? 'bestaudio' : 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
       output: tempFilePath,
@@ -51,6 +57,10 @@ router.get('/youtube', async (req, res) => {
       noWarnings: true,
       extractorArgs: 'youtube:player_client=ios,android'
     };
+
+    if (cookiesPath) {
+      options.cookies = cookiesPath;
+    }
 
     if (isAudio) {
       options.x = true;
@@ -77,6 +87,11 @@ router.get('/youtube', async (req, res) => {
     req.on('close', () => {
       stream.destroy();
       fs.unlink(tempFilePath, () => {});
+      if (cookiesPath) fs.unlink(cookiesPath, () => {});
+    });
+
+    stream.on('end', () => {
+      if (cookiesPath) fs.unlink(cookiesPath, () => {});
     });
 
   } catch (error: any) {
@@ -105,13 +120,28 @@ router.get('/stream', async (req, res) => {
     // Check if we already downloaded this video recently to support rapid seeking
     if (!fs.existsSync(tempFilePath)) {
       console.log(`Downloading ${id} for streaming cache...`);
-      await youtubedl(url, {
+      
+      let cookiesPath: string | undefined;
+      if (process.env.YOUTUBE_COOKIES) {
+        cookiesPath = path.join(os.tmpdir(), `youtube-cookies-${randomUUID()}.txt`);
+        fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES);
+      }
+
+      const options: any = {
         f: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
         output: tempFilePath,
         ffmpegLocation: ffmpegPath || undefined,
         noWarnings: true,
         extractorArgs: 'youtube:player_client=ios,android'
-      } as any);
+      };
+
+      if (cookiesPath) {
+        options.cookies = cookiesPath;
+      }
+
+      await youtubedl(url, options);
+      
+      if (cookiesPath) fs.unlink(cookiesPath, () => {});
       
       // Auto-delete the cache file after 1 hour to prevent disk space issues
       setTimeout(() => {
