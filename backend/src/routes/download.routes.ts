@@ -1,12 +1,15 @@
 import { Router } from 'express';
-import { Innertube } from 'youtubei.js';
 
 const router = Router();
 
+// Dynamic import bypass for ESM packages in a CommonJS TypeScript project
+const importDynamic = new Function('modulePath', 'return import(modulePath)');
+
 // Initialize Innertube globally
-let yt: Innertube | null = null;
+let yt: any = null;
 async function getYT() {
   if (!yt) {
+    const { Innertube } = await importDynamic('youtubei.js');
     yt = await Innertube.create({ retrieve_player: false });
   }
   return yt;
