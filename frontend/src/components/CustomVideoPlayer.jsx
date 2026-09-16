@@ -102,13 +102,13 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                     videoId: videoId,
                     playerVars: {
                         autoplay: 0,
-                        controls: 0,
+                        controls: 1, // Enabled native controls so users can change quality
                         modestbranding: 1,
                         rel: 0,
                         showinfo: 0,
                         iv_load_policy: 3,
-                        disablekb: 1,
-                        fs: 0,
+                        disablekb: 0,
+                        fs: 1, // Enable native fullscreen button
                         playsinline: 1,
                         cc_load_policy: 0,
                         vq: 'hd1080',
@@ -182,45 +182,8 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
         };
     }, [videoId, isYouTube]);
 
-    // Aggressive Quality Enforcer Loop
-    useEffect(() => {
-        if (!isYouTube || !isReady) return;
-
-        // This loop aggressively tells YouTube to upgrade the stream
-        const enforceInterval = setInterval(() => {
-            if (playerRef.current && isPlaying) {
-                try {
-                    const currentQ = playerRef.current.getPlaybackQuality();
-                    if (currentQ !== 'hd1080' && currentQ !== 'highres' && currentQ !== 'hd720') {
-                        playerRef.current.setPlaybackQuality('hd1080');
-                    }
-                } catch (e) { }
-            }
-        }, 3000);
-
-        return () => clearInterval(enforceInterval);
-    }, [isYouTube, isReady, isPlaying]);
-
-    // ABR Exploit: Lie to YouTube about player size to force 1080p
-    useEffect(() => {
-        if (!isYouTube || !isReady) return;
-
-        const fakeSizeInterval = setInterval(() => {
-            if (playerRef.current && playerRef.current.setSize) {
-                // By forcing the API to believe the player is massive (1920x1080), 
-                // YouTube's ABR algorithm is forced to serve the 1080p stream
-                // regardless of the actual CSS rendering size on the screen.
-                playerRef.current.setSize(1920, 1080);
-                
-                // Repeatedly ping the quality enforcer too
-                try {
-                    playerRef.current.setPlaybackQuality('hd1080');
-                } catch(e) {}
-            }
-        }, 2000);
-
-        return () => clearInterval(fakeSizeInterval);
-    }, [isYouTube, isReady]);
+    // Deprecated YouTube API hacks removed. 
+    // YouTube no longer supports setPlaybackQuality or ABR exploits.
 
     // Persistence Logic
     const storageKey = passcode && contentId ? `playback_${passcode}_${contentId}` : null;
@@ -569,17 +532,33 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                 </div>
             )}
 
-            {/* Full Protective Shield: Blocks all YT UI (Share, Logo, Right-Click) and captures clicks for custom play/pause */}
-            <div
-                className="absolute inset-0 z-10"
-                onClick={togglePlay}
-                onContextMenu={(e) => e.preventDefault()}
-                style={{ cursor: 'pointer' }}
-            />
+            {/* YouTube Specific Anti-Share/Anti-Leak Shields (Only needed when video is visible) */}
+            {isYouTube && !audioOnlyMode && (
+                <>
+                    {/* Bottom Left Shield: Blocks the Share (arrow) and Watch Later (clock) buttons below the timeline */}
+                    <div className="absolute bottom-0 left-0 w-24 h-12 z-10 pointer-events-auto" onContextMenu={(e) => e.preventDefault()} />
 
-            {/* Custom Controls */}
+                    {/* Bottom Right Shield: Blocks the YouTube logo below the timeline */}
+                    <div className="absolute bottom-0 right-0 w-32 h-12 z-10 pointer-events-auto" onContextMenu={(e) => e.preventDefault()} />
+
+                    {/* Top Left Shield: Blocks the Video Title and Channel Avatar, but leaves top-right open in case the Settings gear/3-dots menu is there */}
+                    <div className="absolute top-0 left-0 w-[70%] h-16 z-10 pointer-events-auto" onContextMenu={(e) => e.preventDefault()} />
+                </>
+            )}
+
+            {/* Full Protective Shield: Captures clicks for custom play/pause. Disabled for visible YouTube videos to allow native interactions. */}
+            {(!isYouTube || audioOnlyMode) && (
+                <div
+                    className="absolute inset-0 z-10"
+                    onClick={togglePlay}
+                    onContextMenu={(e) => e.preventDefault()}
+                    style={{ cursor: 'pointer' }}
+                />
+            )}
+
+            {/* Custom Controls (Shown for Native/Custom videos, AND YouTube audio-only mode) */}
             <AnimatePresence>
-                {(showControls || !isPlaying) && (
+                {(!isYouTube || audioOnlyMode) && (showControls || !isPlaying) && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -628,7 +607,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 md:gap-4">
                             {/* Play/Pause Button */}
                             <button
                                 onClick={togglePlay}

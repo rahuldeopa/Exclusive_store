@@ -35,7 +35,7 @@ export default function PainAlbumSection({ initialContent }) {
       }
 
       const blob = await response.blob();
-      
+
       const disposition = response.headers.get('Content-Disposition');
       let downloadFilename;
       if (disposition) {
@@ -244,11 +244,10 @@ export default function PainAlbumSection({ initialContent }) {
                 onClick={() => handlePlay(track)}
                 onMouseEnter={() => setHoveredTrack(track.num)}
                 onMouseLeave={() => setHoveredTrack(null)}
-                className={`grid grid-cols-[32px_1fr_auto] sm:grid-cols-[40px_1fr_auto] gap-3 sm:gap-4 px-3 sm:px-5 py-3.5 rounded-lg cursor-pointer transition-all duration-200 group relative ${
-                  isActive
+                className={`grid grid-cols-[32px_1fr_auto] sm:grid-cols-[40px_1fr_auto] gap-3 sm:gap-4 px-3 sm:px-5 py-3.5 rounded-lg cursor-pointer transition-all duration-200 group relative ${isActive
                     ? 'bg-white/[0.06]'
                     : 'hover:bg-white/[0.04]'
-                }`}
+                  }`}
               >
                 {/* Subtle left accent bar on active */}
                 {isActive && (
@@ -272,9 +271,8 @@ export default function PainAlbumSection({ initialContent }) {
 
                 {/* Title & Credits */}
                 <div className="flex flex-col justify-center min-w-0">
-                  <span className={`text-[15px] font-medium truncate transition-colors duration-200 ${
-                    isActive ? 'text-[#ff6b35]' : 'text-white/90 group-hover:text-white'
-                  }`}>
+                  <span className={`text-[15px] font-medium truncate transition-colors duration-200 ${isActive ? 'text-[#ff6b35]' : 'text-white/90 group-hover:text-white'
+                    }`}>
                     {track.title}
                   </span>
                   <span className="text-[13px] text-[#555] group-hover:text-[#777] transition-colors duration-200 truncate">
@@ -344,7 +342,7 @@ export default function PainAlbumSection({ initialContent }) {
             onContextMenu={(e) => e.preventDefault()}
           >
             {/* Dynamic Ambient Background Glow */}
-            <div 
+            <div
               className="absolute inset-0 z-0 opacity-30 scale-125 pointer-events-none"
               style={{
                 backgroundImage: `url(https://img.youtube.com/vi/${activeTrack.youtubeId}/maxresdefault.jpg)`,
@@ -359,8 +357,17 @@ export default function PainAlbumSection({ initialContent }) {
 
             {/* Content wrapper */}
             <div className="relative z-10 flex flex-col h-full w-full">
-              {/* Header */}
-              <div className="p-4 md:p-6 flex items-center justify-between">
+              {/* Floating Back Button for Mobile Landscape (visible only when screen height is small) */}
+              <button
+                onClick={() => setActiveTrack(null)}
+                className="absolute top-4 left-4 z-50 p-3 bg-black/50 hover:bg-black/80 backdrop-blur-md rounded-full text-white md:hidden hidden landscape:flex landscape:items-center landscape:justify-center border border-white/10"
+                style={{ '@media (min-height: 600px)': { display: 'none' } }}
+              >
+                <ChevronDown className="w-6 h-6 rotate-90" />
+              </button>
+
+              {/* Header (Hidden in strict mobile landscape to save space for video) */}
+              <div className="p-4 md:p-6 flex items-center justify-between shrink-0 landscape:max-h-[500px]:hidden">
                 <button onClick={() => setActiveTrack(null)} className="p-2 text-[#666] hover:text-white transition-colors duration-200">
                   <ChevronDown className="w-7 h-7" />
                 </button>
@@ -368,27 +375,25 @@ export default function PainAlbumSection({ initialContent }) {
                 <div className="w-11" />
               </div>
 
-              {/* Audio / Video Toggle */}
-              <div className="flex justify-center mb-4 md:mb-8">
+              {/* Audio / Video Toggle (Hidden in strict mobile landscape) */}
+              <div className="flex justify-center mb-4 md:mb-8 shrink-0 landscape:max-h-[500px]:hidden">
                 <div className="flex bg-white/[0.04] backdrop-blur-sm rounded-full p-1 gap-1 border border-white/[0.06]">
                   <button
                     onClick={() => setPlayerMode('audio')}
-                    className={`px-7 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
-                      playerMode === 'audio'
+                    className={`px-7 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${playerMode === 'audio'
                         ? 'bg-white text-[#030303] shadow-[0_2px_12px_rgba(255,255,255,0.15)]'
                         : 'text-[#666] hover:text-white/80'
-                    }`}
+                      }`}
                   >
                     <Headphones className="w-3.5 h-3.5" />
                     Audio
                   </button>
                   <button
                     onClick={() => setPlayerMode('video')}
-                    className={`px-7 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${
-                      playerMode === 'video'
+                    className={`px-7 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${playerMode === 'video'
                         ? 'bg-white text-[#030303] shadow-[0_2px_12px_rgba(255,255,255,0.15)]'
                         : 'text-[#666] hover:text-white/80'
-                    }`}
+                      }`}
                   >
                     <Volume2 className="w-3.5 h-3.5" />
                     Video
@@ -400,13 +405,45 @@ export default function PainAlbumSection({ initialContent }) {
               <div className="flex-1 flex flex-col items-center justify-start px-4 md:px-6 pb-8 md:pb-12 max-w-6xl mx-auto w-full overflow-y-auto mobile-landscape-container">
                 <motion.div
                   layout
-                  className={`w-full bg-black/60 rounded-2xl overflow-visible shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative transition-all duration-500 flex-shrink-0 mobile-landscape-full border border-white/[0.04] ${
-                    playerMode === 'audio' ? 'max-w-md aspect-square' : 'max-w-5xl aspect-video'
-                  }`}
+                  className={`w-full bg-black/60 rounded-2xl overflow-visible shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative transition-all duration-500 flex-shrink-0 mobile-landscape-full border border-white/[0.04] ${playerMode === 'audio' ? 'max-w-md aspect-square' : 'max-w-5xl aspect-video'
+                    }`}
                 >
                   {(() => {
                     const media = getMediaForTrack(activeTrack.title);
-                    if (media && media.source === 'YOUTUBE') {
+                    if (!media) {
+                      // Fallback to embedded players if backend hasn't supplied custom links yet
+                      if (playerMode === 'video') {
+                        return (
+                          <CustomVideoPlayer
+                            videoUrl={`https://www.youtube.com/watch?v=${activeTrack.youtubeId}`}
+                            title={activeTrack.title}
+                          />
+                        );
+                      } else {
+                        // Audio fallback
+                        return (
+                          <div className="w-full h-full relative group bg-[#050505]">
+                            {/* Art */}
+                            <img
+                              src={`https://img.youtube.com/vi/${activeTrack.youtubeId}/maxresdefault.jpg`}
+                              alt={activeTrack.title}
+                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-60 mix-blend-luminosity"
+                            />
+                            {/* Vignette */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+
+                            {/* We use CustomVideoPlayer in audioOnlyMode to leverage the YouTube IFrame API for audio playback without showing the video */}
+                            <div className="absolute inset-0 z-10">
+                              <CustomVideoPlayer
+                                videoUrl={`https://www.youtube.com/watch?v=${activeTrack.youtubeId}`}
+                                title={activeTrack.title}
+                                audioOnlyMode={true}
+                              />
+                            </div>
+                          </div>
+                        );
+                      }
+                    } else if (media.source === 'YOUTUBE') {
                       if (playerMode === 'video') {
                         return (
                           <CustomVideoPlayer
@@ -422,11 +459,11 @@ export default function PainAlbumSection({ initialContent }) {
                             audioOnlyMode={true}
                             coverNode={
                               <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center relative">
-                                <div className="absolute top-[6%] text-[#0a0a0a] font-black text-2xl tracking-tighter">TURNING</div>
-                                <div className="absolute top-[20%] text-[#0a0a0a] font-medium text-base">MY</div>
-                                <div className="absolute top-[32%] text-[#0a0a0a] font-black text-5xl md:text-7xl tracking-tighter leading-none">PAIN</div>
-                                <div className="absolute top-[58%] text-[#0a0a0a] text-xl md:text-2xl italic" style={{ fontFamily: 'Georgia, serif' }}>into</div>
-                                <div className="absolute bottom-[8%] text-[#0a0a0a] font-black text-3xl md:text-5xl tracking-tighter">PURPOSE</div>
+                                <div className="absolute top-[6%] text-[#0a0a0a] font-black text-[clamp(1.2rem,4vw,1.5rem)] tracking-tighter">TURNING</div>
+                                <div className="absolute top-[20%] text-[#0a0a0a] font-medium text-[clamp(0.8rem,3vw,1rem)]">MY</div>
+                                <div className="absolute top-[32%] text-[#0a0a0a] font-black text-[clamp(3rem,10vw,5rem)] tracking-tighter leading-none">PAIN</div>
+                                <div className="absolute top-[58%] text-[#0a0a0a] text-[clamp(1rem,4vw,1.5rem)] italic" style={{ fontFamily: 'Georgia, serif' }}>into</div>
+                                <div className="absolute bottom-[8%] text-[#0a0a0a] font-black text-[clamp(1.8rem,7vw,3rem)] tracking-tighter">PURPOSE</div>
                                 <svg className="absolute bottom-0 right-0 w-full h-full opacity-[0.06]" viewBox="0 0 100 100" preserveAspectRatio="none">
                                   <path d="M0 100 L100 0 L100 100 Z" fill="#0a0a0a" />
                                 </svg>
@@ -443,11 +480,11 @@ export default function PainAlbumSection({ initialContent }) {
                         <div className="w-full h-full relative">
                           <div className="absolute inset-0 z-0">
                             <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center relative">
-                              <div className="absolute top-[6%] text-[#0a0a0a] font-black text-2xl tracking-tighter">TURNING</div>
-                              <div className="absolute top-[20%] text-[#0a0a0a] font-medium text-base">MY</div>
-                              <div className="absolute top-[32%] text-[#0a0a0a] font-black text-5xl md:text-7xl tracking-tighter leading-none">PAIN</div>
-                              <div className="absolute top-[58%] text-[#0a0a0a] text-xl md:text-2xl italic" style={{ fontFamily: 'Georgia, serif' }}>into</div>
-                              <div className="absolute bottom-[8%] text-[#0a0a0a] font-black text-3xl md:text-5xl tracking-tighter">PURPOSE</div>
+                              <div className="absolute top-[6%] text-[#0a0a0a] font-black text-[clamp(1.2rem,4vw,1.5rem)] tracking-tighter">TURNING</div>
+                              <div className="absolute top-[20%] text-[#0a0a0a] font-medium text-[clamp(0.8rem,3vw,1rem)]">MY</div>
+                              <div className="absolute top-[32%] text-[#0a0a0a] font-black text-[clamp(3rem,10vw,5rem)] tracking-tighter leading-none">PAIN</div>
+                              <div className="absolute top-[58%] text-[#0a0a0a] text-[clamp(1rem,4vw,1.5rem)] italic" style={{ fontFamily: 'Georgia, serif' }}>into</div>
+                              <div className="absolute bottom-[8%] text-[#0a0a0a] font-black text-[clamp(1.8rem,7vw,3rem)] tracking-tighter">PURPOSE</div>
                             </div>
                           </div>
                           <div className="absolute bottom-0 left-0 right-0 z-10 bg-black/80 backdrop-blur-sm p-2">
@@ -466,9 +503,8 @@ export default function PainAlbumSection({ initialContent }) {
                 </motion.div>
 
                 {/* Track Info Below Player */}
-                <div className={`w-full mt-6 md:mt-10 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-500 ${
-                  playerMode === 'audio' ? 'max-w-md' : 'max-w-5xl'
-                }`}>
+                <div className={`w-full mt-6 md:mt-10 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-500 ${playerMode === 'audio' ? 'max-w-md' : 'max-w-5xl'
+                  }`}>
                   <div className="flex flex-col items-start">
                     <h2 className="text-2xl md:text-3xl font-bold text-white mb-1.5 tracking-tight">{activeTrack.title}</h2>
                     <p className="text-base text-[#777]">{activeTrack.credits}</p>
@@ -477,7 +513,7 @@ export default function PainAlbumSection({ initialContent }) {
                     {/* Audio Download */}
                     <button
                       onClick={() => {
-                        const media = initialContent?.media?.find(m => 
+                        const media = initialContent?.media?.find(m =>
                           m.title?.toLowerCase() === activeTrack.title.toLowerCase() || m.youtubeId === activeTrack.youtubeId
                         );
                         // If backend provides an audio type URL, or a general URL that we know is a file
@@ -485,13 +521,12 @@ export default function PainAlbumSection({ initialContent }) {
                         handleDownload(activeTrack.youtubeId, activeTrack.title, directUrl);
                       }}
                       disabled={downloading.audio}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 border ${
-                        downloadDone.audio
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 border ${downloadDone.audio
                           ? 'bg-green-500/10 border-green-500/30 text-green-400'
                           : downloading.audio
                             ? 'bg-white/[0.03] border-white/[0.08] text-[#888] cursor-wait'
                             : 'bg-white/[0.04] border-white/[0.08] text-[#aaa] hover:bg-white/[0.08] hover:border-[#ff6b35]/30 hover:text-white active:scale-95'
-                      }`}
+                        }`}
                     >
                       {downloadDone.audio ? (
                         <Check className="w-4 h-4" />
@@ -507,7 +542,7 @@ export default function PainAlbumSection({ initialContent }) {
                     {/* Video Download */}
                     <button
                       onClick={() => {
-                        const media = initialContent?.media?.find(m => 
+                        const media = initialContent?.media?.find(m =>
                           m.title?.toLowerCase() === activeTrack.title.toLowerCase() || m.youtubeId === activeTrack.youtubeId
                         );
                         const directUrl = media?.type === 'video' ? (media.playUrl || media.url) : null;
