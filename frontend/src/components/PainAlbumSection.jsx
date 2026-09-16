@@ -366,8 +366,8 @@ export default function PainAlbumSection({ initialContent }) {
                 <ChevronDown className="w-6 h-6 rotate-90" />
               </button>
 
-              {/* Header (Hidden in strict mobile landscape to save space for video) */}
-              <div className="p-4 md:p-6 flex items-center justify-between shrink-0 landscape:max-h-[500px]:hidden">
+              {/* Header (Sticky so it doesn't get lost when scrolling, hidden in strict mobile landscape) */}
+              <div className="sticky top-0 z-40 p-4 md:p-6 flex items-center justify-between shrink-0 landscape:max-h-[500px]:hidden bg-[#030303]/80 backdrop-blur-md border-b border-white/[0.02]">
                 <button onClick={() => setActiveTrack(null)} className="p-2 text-[#666] hover:text-white transition-colors duration-200">
                   <ChevronDown className="w-7 h-7" />
                 </button>
@@ -376,7 +376,7 @@ export default function PainAlbumSection({ initialContent }) {
               </div>
 
               {/* Audio / Video Toggle (Hidden in strict mobile landscape) */}
-              <div className="flex justify-center mb-4 md:mb-8 shrink-0 landscape:max-h-[500px]:hidden">
+              <div className="flex justify-center mt-4 mb-4 md:mb-8 shrink-0 landscape:max-h-[500px]:hidden">
                 <div className="flex bg-white/[0.04] backdrop-blur-sm rounded-full p-1 gap-1 border border-white/[0.06]">
                   <button
                     onClick={() => setPlayerMode('audio')}
