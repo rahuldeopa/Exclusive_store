@@ -43,8 +43,8 @@ router.get('/youtube', async (req, res) => {
 
     // Get all audio-only formats, sorted by bitrate (highest first)
     const audioFormats = (info.streaming_data?.adaptive_formats || [])
-      .filter(f => f.mime_type && f.mime_type.startsWith('audio'))
-      .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
+      .filter((f: any) => f.mime_type && f.mime_type.startsWith('audio'))
+      .sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0));
 
     const format = audioFormats[0];
 
@@ -104,16 +104,16 @@ router.get('/stream', async (req, res) => {
 
     // Get best pre-muxed format for streaming, or highest video-only if no muxed
     const muxed = (info.streaming_data?.formats || [])
-      .filter(f => f.has_video && f.has_audio)
-      .sort((a, b) => (b.height || 0) - (a.height || 0));
+      .filter((f: any) => f.has_video && f.has_audio)
+      .sort((a: any, b: any) => (b.height || 0) - (a.height || 0));
 
     let format = muxed[0];
     
     // Fallback to video-only if no muxed format is available
     if (!format) {
       const videos = (info.streaming_data?.adaptive_formats || [])
-        .filter(f => f.mime_type && f.mime_type.startsWith('video'))
-        .sort((a, b) => (b.height || 0) - (a.height || 0));
+        .filter((f: any) => f.mime_type && f.mime_type.startsWith('video'))
+        .sort((a: any, b: any) => (b.height || 0) - (a.height || 0));
       format = videos[0];
     }
 
