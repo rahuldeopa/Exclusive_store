@@ -1,13 +1,23 @@
 import { Router } from 'express';
-import youtubedl from 'youtube-dl-exec';
-import ffmpegPath from 'ffmpeg-static';
-import path from 'path';
-import os from 'os';
-import { randomUUID } from 'crypto';
-import fs from 'fs';
+import { Innertube } from 'youtubei.js';
 
 const router = Router();
 
+// Initialize Innertube globally
+let yt: Innertube | null = null;
+async function getYT() {
+  if (!yt) {
+    yt = await Innertube.create({ retrieve_player: false });
+  }
+  return yt;
+}
+
+/**
+ * Download endpoint — uses youtubei.js (pure Node.js).
+ * Works on Vercel serverless functions (no binary dependencies).
+ * 
+ * GET /api/download/youtube?id=YOUTUBE_ID&type=audio
+ */
 router.get('/youtube', async (req, res) => {
   const { id, type } = req.query;
 
@@ -15,95 +25,55 @@ router.get('/youtube', async (req, res) => {
     res.status(400).json({ error: 'YouTube ID is required' });
     return;
   }
-
-  const url = `https://www.youtube.com/watch?v=${id}`;
-  const isAudio = type === 'audio';
+  
+  if (type !== 'audio') {
+    res.status(400).json({ error: 'Only audio downloads are supported natively on Vercel' });
+    return;
+  }
 
   try {
-    let cookiesPath: string | undefined;
-    if (process.env.YOUTUBE_COOKIES) {
-      cookiesPath = path.join(os.tmpdir(), `youtube-cookies-${randomUUID()}.txt`);
-      fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES.replace(/\\n/g, '\n'));
-    }
-
-    let title = 'media';
-    try {
-      const infoOpts: any = {
-        dumpSingleJson: true,
-        noCheckCertificates: true,
-        noWarnings: true,
-        preferFreeFormats: true,
-      };
-      
-      if (cookiesPath) {
-        infoOpts.cookies = cookiesPath;
-      } else {
-        infoOpts.extractorArgs = 'youtube:player_client=ios,android';
-      }
-
-      const info = await youtubedl(url, infoOpts);
-      if (info && (info as any).title) {
-        title = (info as any).title.replace(/[^\w\s-]/gi, '_').trim();
-      }
-    } catch (e) {
-      console.warn('Failed to fetch title', e);
-    }
-
-    const ext = isAudio ? 'wav' : 'mp4';
-    const filename = `${title}_${type}.${ext}`;
+    console.log(`[Download] Fetching info for ${id}...`);
+    const youtube = await getYT();
+    const info = await youtube.getBasicInfo(id);
     
-    const tempFilePath = path.join(os.tmpdir(), `${randomUUID()}.${ext}`);
+    const title = (info.basic_info.title || 'audio').replace(/[^\w\s-]/gi, '_').trim();
 
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.setHeader('Content-Type', isAudio ? 'audio/wav' : 'video/mp4');
+    // Get all audio-only formats, sorted by bitrate (highest first)
+    const audioFormats = (info.streaming_data?.adaptive_formats || [])
+      .filter(f => f.mime_type && f.mime_type.startsWith('audio'))
+      .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0));
 
-    const options: any = {
-      f: isAudio ? 'bestaudio' : 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
-      output: tempFilePath,
-      ffmpegLocation: ffmpegPath || undefined,
-      noWarnings: true,
-    };
+    const format = audioFormats[0];
 
-    if (cookiesPath) {
-      options.cookies = cookiesPath;
-    } else {
-      options.extractorArgs = 'youtube:player_client=ios,android';
+    if (!format || !format.url) {
+      throw new Error('No audio format found');
     }
 
-    if (isAudio) {
-      options.x = true;
-      options.audioFormat = 'wav';
+    const ext = format.mime_type?.includes('webm') ? 'webm' : 'm4a';
+    const mimeType = format.mime_type?.split(';')[0] || 'audio/mp4';
+
+    console.log(`[Download] Audio format: ${mimeType} @ ${format.bitrate}bps`);
+
+    res.setHeader('Content-Disposition', `attachment; filename="${title}_audio.${ext}"`);
+    res.setHeader('Content-Type', mimeType);
+
+    // Fetch the stream URL directly and pipe it to the response
+    const streamRes = await fetch(format.url);
+    if (!streamRes.ok || !streamRes.body) {
+      throw new Error(`Failed to fetch stream: ${streamRes.statusText}`);
     }
 
-    await youtubedl(url, options);
-
-    const stream = fs.createReadStream(tempFilePath);
-    stream.pipe(res);
-    
-    stream.on('end', () => {
-      fs.unlink(tempFilePath, (err) => {
-        if (err) console.error('Failed to delete temp file:', err);
-      });
-    });
-    
-    stream.on('error', (err) => {
-      console.error('Stream read error:', err);
-      fs.unlink(tempFilePath, () => {});
-      if (!res.headersSent) res.status(500).end();
-    });
+    // Convert Web ReadableStream to Node.js stream and pipe
+    // @ts-ignore
+    const nodeStream = require('stream').Readable.fromWeb(streamRes.body);
+    nodeStream.pipe(res);
 
     req.on('close', () => {
-      stream.destroy();
-      fs.unlink(tempFilePath, () => {});
-      if (cookiesPath) fs.unlink(cookiesPath, () => {});
-    });
-
-    stream.on('end', () => {
-      if (cookiesPath) fs.unlink(cookiesPath, () => {});
+      nodeStream.destroy();
     });
 
   } catch (error: any) {
-    console.error('Error downloading YouTube media:', error);
+    console.error('[Download] Error:', error.message);
     if (!res.headersSent) {
       res.removeHeader('Content-Disposition');
       res.removeHeader('Content-Type');
@@ -112,6 +82,12 @@ router.get('/youtube', async (req, res) => {
   }
 });
 
+/**
+ * Streaming endpoint — uses youtubei.js for direct proxy streaming.
+ * Used by the custom video player for proxy playback.
+ * 
+ * GET /api/download/stream?id=YOUTUBE_ID
+ */
 router.get('/stream', async (req, res) => {
   const { id } = req.query;
   if (!id || typeof id !== 'string') {
@@ -119,54 +95,45 @@ router.get('/stream', async (req, res) => {
     return;
   }
 
-  const url = `https://www.youtube.com/watch?v=${id}`;
-  
   try {
-    const ext = 'mp4';
-    const tempFilePath = path.join(os.tmpdir(), `yt_cache_${id}.${ext}`);
+    const youtube = await getYT();
+    const info = await youtube.getBasicInfo(id);
 
-    // Check if we already downloaded this video recently to support rapid seeking
-    if (!fs.existsSync(tempFilePath)) {
-      console.log(`Downloading ${id} for streaming cache...`);
-      
-      let cookiesPath: string | undefined;
-      if (process.env.YOUTUBE_COOKIES) {
-        cookiesPath = path.join(os.tmpdir(), `youtube-cookies-${randomUUID()}.txt`);
-        fs.writeFileSync(cookiesPath, process.env.YOUTUBE_COOKIES.replace(/\\n/g, '\n'));
-      }
+    // Get best pre-muxed format for streaming, or highest video-only if no muxed
+    const muxed = (info.streaming_data?.formats || [])
+      .filter(f => f.has_video && f.has_audio)
+      .sort((a, b) => (b.height || 0) - (a.height || 0));
 
-      const options: any = {
-        f: 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best',
-        output: tempFilePath,
-        ffmpegLocation: ffmpegPath || undefined,
-        noWarnings: true,
-      };
-
-      if (cookiesPath) {
-        options.cookies = cookiesPath;
-      } else {
-        options.extractorArgs = 'youtube:player_client=ios,android';
-      }
-
-      await youtubedl(url, options);
-      
-      if (cookiesPath) fs.unlink(cookiesPath, () => {});
-      
-      // Auto-delete the cache file after 1 hour to prevent disk space issues
-      setTimeout(() => {
-        fs.unlink(tempFilePath, () => console.log(`Cleared cache for ${id}`));
-      }, 60 * 60 * 1000); 
-    } else {
-      console.log(`Serving ${id} from streaming cache...`);
+    let format = muxed[0];
+    
+    // Fallback to video-only if no muxed format is available
+    if (!format) {
+      const videos = (info.streaming_data?.adaptive_formats || [])
+        .filter(f => f.mime_type && f.mime_type.startsWith('video'))
+        .sort((a, b) => (b.height || 0) - (a.height || 0));
+      format = videos[0];
     }
 
-    res.setHeader('Content-Type', 'video/mp4');
-    
-    // Using sendFile enables Express to handle Range requests for seeking automatically!
-    res.sendFile(tempFilePath);
-    
+    if (!format || !format.url) throw new Error('No streamable format found');
+
+    const mimeType = format.mime_type?.split(';')[0] || 'video/mp4';
+    res.setHeader('Content-Type', mimeType);
+
+    console.log(`[Stream] Serving ${id}: ${format.width}x${format.height}`);
+
+    const streamRes = await fetch(format.url);
+    if (!streamRes.ok || !streamRes.body) throw new Error('Failed to fetch stream');
+
+    // @ts-ignore
+    const nodeStream = require('stream').Readable.fromWeb(streamRes.body);
+    nodeStream.pipe(res);
+
+    req.on('close', () => {
+      nodeStream.destroy();
+    });
+
   } catch (error: any) {
-    console.error('Error streaming YouTube media:', error);
+    console.error('[Stream] Error:', error.message);
     if (!res.headersSent) {
       res.removeHeader('Content-Type');
       res.status(500).json({ error: 'Failed to stream media', details: error.message || String(error) });
