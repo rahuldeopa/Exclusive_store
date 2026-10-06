@@ -203,7 +203,19 @@ export default function DigitalBookViewer({ passcode, initialContent }) {
                             fontFamily: 'Georgia, serif',
                             margin: '0 auto'
                           }
-                        })
+                        });
+
+                        val.hooks.content.register((contents) => {
+                          const links = contents.document.querySelectorAll('a[href^="http"]');
+                          links.forEach((link) => {
+                            link.setAttribute('target', '_blank');
+                            link.setAttribute('rel', 'noopener noreferrer');
+                            link.onclick = (e) => {
+                              e.preventDefault();
+                              window.open(link.href, '_blank', 'noopener,noreferrer');
+                            };
+                          });
+                        });
                       }}
                     />
                   </div>
