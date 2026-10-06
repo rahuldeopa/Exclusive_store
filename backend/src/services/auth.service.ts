@@ -51,7 +51,12 @@ export async function verifyPasscodeService(passcode: string) {
       // R2 audio / video
       if (media.source === 'R2') {
         try {
-          const signedUrl = await getSignedMediaUrl(media.objectKey!);
+          let signedUrl = '';
+          if (media.objectKey?.startsWith('local:')) {
+            signedUrl = `/${media.objectKey.substring(6)}`;
+          } else {
+            signedUrl = await getSignedMediaUrl(media.objectKey!);
+          }
 
           return {
             id: media.id,

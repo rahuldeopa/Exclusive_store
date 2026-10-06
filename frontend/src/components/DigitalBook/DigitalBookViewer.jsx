@@ -25,8 +25,27 @@ export default function DigitalBookViewer({ passcode, initialContent }) {
 
   useEffect(() => {
     if (rendition) {
-      rendition.themes.override('color', isDark ? '#f5f3f0' : '#0a0a0a');
-      rendition.themes.override('background', isDark ? '#0a0a0a' : '#ffffff');
+      const lightTheme = {
+        'body': { 'background': '#ffffff', 'color': '#0a0a0a' },
+        'p': { 'color': '#0a0a0a !important' },
+        'span': { 'color': '#0a0a0a !important' },
+        'h1, h2, h3, h4, h5, h6': { 'color': '#0a0a0a !important' },
+        'li': { 'color': '#0a0a0a !important' },
+        'div': { 'color': '#0a0a0a !important' }
+      };
+      
+      const darkTheme = {
+        'body': { 'background': '#0a0a0a', 'color': '#f5f3f0' },
+        'p': { 'color': '#f5f3f0 !important' },
+        'span': { 'color': '#f5f3f0 !important' },
+        'h1, h2, h3, h4, h5, h6': { 'color': '#f5f3f0 !important' },
+        'li': { 'color': '#f5f3f0 !important' },
+        'div': { 'color': '#f5f3f0 !important' }
+      };
+
+      rendition.themes.register('light', lightTheme);
+      rendition.themes.register('dark', darkTheme);
+      rendition.themes.select(isDark ? 'dark' : 'light');
     }
   }, [isDark, rendition]);
 
@@ -182,9 +201,7 @@ export default function DigitalBookViewer({ passcode, initialContent }) {
                           '::selection': { background: 'rgba(255, 107, 53, 0.3)' },
                           body: {
                             fontFamily: 'Georgia, serif',
-                            margin: '0 auto',
-                            color: isDark ? '#f5f3f0' : '#0a0a0a',
-                            background: isDark ? '#0a0a0a' : '#ffffff'
+                            margin: '0 auto'
                           }
                         })
                       }}
