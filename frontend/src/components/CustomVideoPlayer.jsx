@@ -271,6 +271,11 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
         video.addEventListener('playing', onPlaying);
         video.addEventListener('canplay', onCanPlay);
 
+        // If metadata is already loaded before event listener is attached
+        if (video.readyState >= 1) {
+            onLoaded();
+        }
+
         return () => {
             video.removeEventListener('timeupdate', updateTime);
             video.removeEventListener('play', onPlay);
@@ -281,7 +286,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
             video.removeEventListener('playing', onPlaying);
             video.removeEventListener('canplay', onCanPlay);
         };
-    }, [isYouTube, isSeeking]);
+    }, [isYouTube, isSeeking, videoUrl]);
 
 
     // Handle play/pause
@@ -510,6 +515,8 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                         src={videoUrl}
                         className="absolute inset-0 w-full h-full object-contain"
                         playsInline
+                        preload="metadata"
+                        crossOrigin="anonymous"
                     />
                 )}
             </div>
@@ -521,13 +528,12 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                 </div>
             )}
 
-            {/* Honest Loader for Native Video (Proxy) */}
+            {/* Loader for Native Video */}
             {!isYouTube && isBuffering && (
                 <div className="absolute inset-0 z-[15] flex items-center justify-center bg-black/80 pointer-events-none">
                     <div className="flex flex-col items-center">
                         <div className="w-12 h-12 border-4 border-[#ff6b35] border-t-transparent rounded-full animate-spin shadow-[0_0_15px_rgba(255,107,53,0.5)]"></div>
-                        <p className="text-white mt-5 font-bold text-sm tracking-widest drop-shadow-md">PREPARING HD STREAM</p>
-                        <p className="text-gray-400 text-xs mt-2 font-medium">(This takes ~10 seconds to merge tracks)</p>
+                        <p className="text-white mt-5 font-bold text-sm tracking-widest drop-shadow-md">LOADING STREAM</p>
                     </div>
                 </div>
             )}

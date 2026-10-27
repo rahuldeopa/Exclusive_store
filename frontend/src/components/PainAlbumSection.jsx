@@ -66,11 +66,48 @@ export default function PainAlbumSection({ initialContent }) {
     }
   };
 
-  const handleVideoDownload = (youtubeId, directVideoUrl = null) => {
+  const handleVideoDownload = async (youtubeId, directVideoUrl = null, trackTitle = 'video') => {
+    if (downloading.video) return;
+
     if (directVideoUrl) {
-      window.open(directVideoUrl, '_blank');
+      setDownloading(prev => ({ ...prev, video: true }));
+      setDownloadDone(prev => ({ ...prev, video: false }));
+      try {
+        const response = await fetch(directVideoUrl);
+        if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
+        const blob = await response.blob();
+
+        const disposition = response.headers.get('Content-Disposition');
+        let downloadFilename;
+        if (disposition) {
+          const match = disposition.match(/filename="?([^";\n]+)"?/);
+          downloadFilename = match ? match[1] : null;
+        }
+        if (!downloadFilename) {
+          const safeName = trackTitle.replace(/[^\w\s-]/gi, '_').trim();
+          downloadFilename = `${safeName}.mp4`;
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = downloadFilename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        setDownloadDone(prev => ({ ...prev, video: true }));
+        setTimeout(() => setDownloadDone(prev => ({ ...prev, video: false })), 3000);
+      } catch (err) {
+        console.error('Direct download error, opening link:', err);
+        window.open(directVideoUrl, '_blank');
+      } finally {
+        setDownloading(prev => ({ ...prev, video: false }));
+      }
       return;
     }
+
     // Vercel doesn't support ffmpeg, so we redirect video downloads to a clean, ad-free external service (cobalt.tools)
     const url = `https://www.youtube.com/watch?v=${youtubeId}`;
     window.open(`https://cobalt.tools/?u=${encodeURIComponent(url)}`, '_blank');
@@ -88,14 +125,24 @@ export default function PainAlbumSection({ initialContent }) {
     { num: 9, title: 'Net Worth', credits: 'beat by Workdonebeatz sung by Chikorus YL', youtubeId: 'FjpUIHgRrDc', duration: '2:48' },
     { num: 10, title: 'Real Friends', credits: 'beat by Workdonebeatz sung by Chikorus YL', youtubeId: '7cNq-GVlw6E', duration: '3:59' },
     { num: 11, title: 'Mask off', credits: 'beat by Workdonebeatz sung by Amina and Chikorus YL', youtubeId: 'M4kqqcu4dOQ', duration: '2:53' },
-    { num: 12, title: 'Blessings on the Way (remix)', credits: 'beat by Workdonebeatz sung by Amina and Chikorus YL', youtubeId: 'IzGX936iX1o', duration: '2:23' }
+    {
+      num: 12,
+      title: 'Blessings on the Way (remix)',
+      credits: 'beat by Workdonebeatz sung by Amina and Chikorus YL',
+      youtubeId: 'IzGX936iX1o',
+      duration: '2:23',
+      videoUrl: 'https://voiddrive.org/s/ab3f5f613a39ca9474d02038b39a9ba27f28affb03ec4e6a95b39c0b67c03c1f'
+    }
   ];
 
   const totalDuration = '39:48';
 
-  // Map directly from our hardcoded list, fallback to backend
+  // Map directly from our track list, with priority for direct high-quality videoUrl if present, fallback to backend
   const getMediaForTrack = (title) => {
     const track = tracks.find(t => t.title === title);
+    if (track && track.videoUrl) {
+      return { source: 'DIRECT', videoUrl: track.videoUrl, youtubeId: track.youtubeId };
+    }
     if (track && track.youtubeId) {
       return { source: 'YOUTUBE', youtubeId: track.youtubeId };
     }
@@ -271,10 +318,17 @@ export default function PainAlbumSection({ initialContent }) {
 
                 {/* Title & Credits */}
                 <div className="flex flex-col justify-center min-w-0">
-                  <span className={`text-[15px] font-medium truncate transition-colors duration-200 ${isActive ? 'text-[#ff6b35]' : 'text-white/90 group-hover:text-white'
-                    }`}>
-                    {track.title}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[15px] font-medium truncate transition-colors duration-200 ${isActive ? 'text-[#ff6b35]' : 'text-white/90 group-hover:text-white'
+                      }`}>
+                      {track.title}
+                    </span>
+                    {track.videoUrl && (
+                      <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold tracking-wide bg-[#ff6b35]/15 text-[#ff6b35] border border-[#ff6b35]/25">
+                        Direct Stream
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[13px] text-[#555] group-hover:text-[#777] transition-colors duration-200 truncate">
                     {track.credits}
                   </span>
@@ -410,7 +464,38 @@ export default function PainAlbumSection({ initialContent }) {
                 >
                   {(() => {
                     const media = getMediaForTrack(activeTrack.title);
-                    if (!media) {
+                    const directVideoUrl = activeTrack.videoUrl || (media?.source === 'DIRECT' ? media.videoUrl : null);
+
+                    if (directVideoUrl) {
+                      if (playerMode === 'video') {
+                        return (
+                          <CustomVideoPlayer
+                            videoUrl={directVideoUrl}
+                            title={activeTrack.title}
+                          />
+                        );
+                      } else {
+                        return (
+                          <CustomVideoPlayer
+                            videoUrl={directVideoUrl}
+                            title={activeTrack.title}
+                            audioOnlyMode={true}
+                            coverNode={
+                              <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center relative">
+                                <div className="absolute top-[6%] text-[#0a0a0a] font-black text-[clamp(1.2rem,4vw,1.5rem)] tracking-tighter">TURNING</div>
+                                <div className="absolute top-[20%] text-[#0a0a0a] font-medium text-[clamp(0.8rem,3vw,1rem)]">MY</div>
+                                <div className="absolute top-[32%] text-[#0a0a0a] font-black text-[clamp(3rem,10vw,5rem)] tracking-tighter leading-none">PAIN</div>
+                                <div className="absolute top-[58%] text-[#0a0a0a] text-[clamp(1rem,4vw,1.5rem)] italic" style={{ fontFamily: 'Georgia, serif' }}>into</div>
+                                <div className="absolute bottom-[8%] text-[#0a0a0a] font-black text-[clamp(1.8rem,7vw,3rem)] tracking-tighter">PURPOSE</div>
+                                <svg className="absolute bottom-0 right-0 w-full h-full opacity-[0.06]" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                  <path d="M0 100 L100 0 L100 100 Z" fill="#0a0a0a" />
+                                </svg>
+                              </div>
+                            }
+                          />
+                        );
+                      }
+                    } else if (!media) {
                       // Fallback to embedded players if backend hasn't supplied custom links yet
                       if (playerMode === 'video') {
                         return (
@@ -545,14 +630,26 @@ export default function PainAlbumSection({ initialContent }) {
                         const media = initialContent?.media?.find(m =>
                           m.title?.toLowerCase() === activeTrack.title.toLowerCase() || m.youtubeId === activeTrack.youtubeId
                         );
-                        const directUrl = media?.type === 'video' ? (media.playUrl || media.url) : null;
-                        handleVideoDownload(activeTrack.youtubeId, directUrl);
+                        const directUrl = activeTrack.videoUrl || (media?.type === 'video' ? (media.playUrl || media.url) : null);
+                        handleVideoDownload(activeTrack.youtubeId, directUrl, activeTrack.title);
                       }}
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 border bg-white/[0.04] border-white/[0.08] text-[#aaa] hover:bg-white/[0.08] hover:border-[#ff6b35]/30 hover:text-white active:scale-95"
+                      disabled={downloading.video}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 border ${downloadDone.video
+                          ? 'bg-green-500/10 border-green-500/30 text-green-400'
+                          : downloading.video
+                            ? 'bg-white/[0.03] border-white/[0.08] text-[#888] cursor-wait'
+                            : 'bg-white/[0.04] border-white/[0.08] text-[#aaa] hover:bg-white/[0.08] hover:border-[#ff6b35]/30 hover:text-white active:scale-95'
+                        }`}
                     >
-                      <Download className="w-4 h-4" />
-                      <span className="hidden sm:inline">Video</span>
-                      <span className="sm:hidden">MP4</span>
+                      {downloadDone.video ? (
+                        <Check className="w-4 h-4" />
+                      ) : downloading.video ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4" />
+                      )}
+                      <span className="hidden sm:inline">{downloading.video ? 'Downloading...' : downloadDone.video ? 'Done!' : 'Video'}</span>
+                      <span className="sm:hidden">{downloading.video ? '...' : downloadDone.video ? '✓' : 'MP4'}</span>
                     </button>
                   </div>
                 </div>

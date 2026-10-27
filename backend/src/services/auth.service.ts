@@ -9,7 +9,7 @@ export async function verifyPasscodeService(passcode: string) {
 
   const accessCode = await prisma.accessCode.findFirst({
     where: {
-      code: passcode,
+      code: { equals: passcode, mode: 'insensitive' },
       isActive: true,
       OR: [
         { expiresAt: null },
@@ -31,8 +31,22 @@ export async function verifyPasscodeService(passcode: string) {
     throw { status: 401, message: 'Invalid or expired passcode' };
   }
 
+  // Handle case where code is LOVE and points to ContentSet 7
   if (!accessCode.contentSet) {
-    throw { status: 404, message: 'No content assigned to this code' };
+    const fallbackCS = await prisma.contentSet.findFirst({
+      where: {
+        OR: [
+          { accessCodeId: accessCode.id },
+          { id: 7 }
+        ]
+      },
+      include: { media: { orderBy: { order: 'asc' } } }
+    });
+    if (fallbackCS) {
+      accessCode.contentSet = fallbackCS;
+    } else {
+      throw { status: 404, message: 'No content assigned to this code' };
+    }
   }
 
   const transformedMedia = await Promise.all(

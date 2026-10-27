@@ -7,6 +7,7 @@ import AudiobookSection from '../components/AudiobookSection';
 import ShortFilmSection from '../components/ShortFilmSection';
 import DigitalBookViewer from '../components/DigitalBook/DigitalBookViewer';
 import PainAlbumSection from '../components/PainAlbumSection';
+import LoveAlbumSection from '../components/LoveAlbumSection';
 import { Video, Music, Sparkles, ArrowDown, Lock } from 'lucide-react';
 
 /**
@@ -19,6 +20,11 @@ export default function Landing() {
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [mediaContent, setMediaContent] = useState(null);
   const [passcode, setPasscode] = useState(initialPasscode);
+
+  const isLoveAlbum =
+    ['LOVE', 'LOVE2026', 'LIB2026', 'LOVEISBLIND'].includes(passcode?.toUpperCase()) ||
+    mediaContent?.title?.toLowerCase()?.includes('love is blind') ||
+    mediaContent?.id === 7;
 
   const handleUnlock = (content, code) => {
     setIsUnlocked(true);
@@ -88,8 +94,8 @@ export default function Landing() {
               </motion.div>
             </header>
 
-            {/* Generic Hero Section - Only shown for MUSIC or when no specific immersive experience is active and not PAIN passcode */}
-            {mediaContent?.type === 'MUSIC' && passcode?.toUpperCase() !== 'PAIN' && (
+            {/* Generic Hero Section - Only shown for MUSIC or when no specific immersive experience is active and not PAIN / LOVE album */}
+            {mediaContent?.type === 'MUSIC' && passcode?.toUpperCase() !== 'PAIN' && !isLoveAlbum && (
               <section className="relative w-full py-24 overflow-hidden ">
                 {/* Background decorations */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none">
@@ -195,6 +201,8 @@ export default function Landing() {
             {/* Experience Dispatcher */}
             {passcode?.toUpperCase() === 'PAIN' ? (
               <PainAlbumSection initialContent={mediaContent} />
+            ) : isLoveAlbum ? (
+              <LoveAlbumSection initialContent={mediaContent} passcode={passcode} />
             ) : mediaContent?.type === 'AUDIOBOOK' ? (
               <AudiobookSection initialContent={mediaContent} passcode={passcode} />
             ) : mediaContent?.type === 'SHORT_FILM' ? (

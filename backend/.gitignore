@@ -6,3 +6,4 @@ dist/
 .md
 CLAUDE.md
 DESIGN.md
+cache/
