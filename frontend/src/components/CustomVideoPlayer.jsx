@@ -648,11 +648,7 @@ export default function CustomVideoPlayer({ videoUrl, title, passcode, contentId
                                     )}
                                 </button>
                                 {/* Volume Control (Hidden on mobile as OS controls volume) */}
-                                <div
-                                    className="relative hidden sm:flex items-center gap-2 group/volume"
-                                    onMouseEnter={() => setShowVolume(true)}
-                                    onMouseLeave={() => setShowVolume(false)}
-                                >
+                                <div className="relative hidden sm:flex items-center gap-2 group/volume">
                                     <input
                                         type="range"
                                         min="0"

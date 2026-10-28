@@ -15,8 +15,10 @@ import { Video, Music, Sparkles, ArrowDown, Lock } from 'lucide-react';
  * Premium music store experience with ceremonial unlock transition
  */
 export default function Landing() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialPasscode = searchParams.get('passcode') || '';
+  // Code the gate auto-submits; cleared on lock so it doesn't unlock itself again.
+  const [autoPasscode, setAutoPasscode] = useState(initialPasscode);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [mediaContent, setMediaContent] = useState(null);
   const [passcode, setPasscode] = useState(initialPasscode);
@@ -25,6 +27,17 @@ export default function Landing() {
     ['LOVE', 'LOVE2026', 'LIB2026', 'LOVEISBLIND'].includes(passcode?.toUpperCase()) ||
     mediaContent?.title?.toLowerCase()?.includes('love is blind') ||
     mediaContent?.id === 7;
+
+  const handleLock = () => {
+    // Drop ?passcode from the URL, otherwise the gate would auto-unlock again immediately.
+    if (searchParams.has('passcode')) {
+      const next = new URLSearchParams(searchParams);
+      next.delete('passcode');
+      setSearchParams(next, { replace: true });
+    }
+    setAutoPasscode('');
+    setIsUnlocked(false);
+  };
 
   const handleUnlock = (content, code) => {
     setIsUnlocked(true);
@@ -42,7 +55,7 @@ export default function Landing() {
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.6 }}
           >
-            <PasscodeGate onUnlock={handleUnlock} initialPasscode={initialPasscode} />
+            <PasscodeGate onUnlock={handleUnlock} initialPasscode={autoPasscode} />
           </motion.div>
         ) : (
           <motion.div
@@ -80,7 +93,7 @@ export default function Landing() {
                 {/* Lock Button */}
                 <motion.button
                   className="group px-5 py-2.5 bg-white dark:bg-[#1a1a1a] border border-[#e5e5e5] dark:border-[#2a2a2a] hover:border-[#ff6b35]/50 hover:bg-slate-50 dark:hover:bg-[#2d2d2d] text-[#888888] hover:text-[#0a0a0a] dark:hover:text-[#f5f3f0] transition-all duration-300 uppercase text-xs tracking-widest font-bold rounded-xl flex items-center gap-2 shadow-sm"
-                  onClick={() => setIsUnlocked(false)}
+                  onClick={handleLock}
                   title="Re-lock content"
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
