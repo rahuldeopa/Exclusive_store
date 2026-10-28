@@ -1,117 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import CustomVideoPlayer from './CustomVideoPlayer';
-import CustomAudioPlayer from './CustomAudioPlayer';
-import { Play, Pause, Clock, ChevronDown, Disc3, Music2, Headphones, Volume2, Download, Check, Loader2 } from 'lucide-react';
+import { Play, Clock } from 'lucide-react';
+import AlbumPlayer from './album/AlbumPlayer';
+import { usePlayer } from './album/usePlayer';
+import { buildPainAlbum } from './album/albums';
 
 export default function PainAlbumSection({ initialContent }) {
-  const [activeTrack, setActiveTrack] = useState(null);
-  const [playerMode, setPlayerMode] = useState('audio'); // 'audio' or 'video'
   const [hoveredTrack, setHoveredTrack] = useState(null);
-  const [downloading, setDownloading] = useState({ audio: false, video: false });
-  const [downloadDone, setDownloadDone] = useState({ audio: false, video: false });
 
   const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
-
-  const handleDownload = async (youtubeId, trackTitle, directAudioUrl = null) => {
-    if (downloading.audio) return;
-
-    // If we have a direct URL (like WeShare or Supabase), just download it directly
-    if (directAudioUrl) {
-      window.open(directAudioUrl, '_blank');
-      return;
-    }
-
-    setDownloading(prev => ({ ...prev, audio: true }));
-    setDownloadDone(prev => ({ ...prev, audio: false }));
-
-    try {
-      const response = await fetch(
-        `${API_BASE}/api/download/youtube?id=${encodeURIComponent(youtubeId)}&type=audio`
-      );
-
-      if (!response.ok) {
-        throw new Error(`Download failed: ${response.statusText}`);
-      }
-
-      const blob = await response.blob();
-
-      const disposition = response.headers.get('Content-Disposition');
-      let downloadFilename;
-      if (disposition) {
-        const match = disposition.match(/filename="?([^";\n]+)"?/);
-        downloadFilename = match ? match[1] : null;
-      }
-      if (!downloadFilename) {
-        const safeName = trackTitle.replace(/[^\w\s-]/gi, '_').trim();
-        downloadFilename = `${safeName}_audio.m4a`;
-      }
-
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = downloadFilename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      setDownloadDone(prev => ({ ...prev, audio: true }));
-      setTimeout(() => setDownloadDone(prev => ({ ...prev, audio: false })), 3000);
-    } catch (err) {
-      console.error(`Download error (audio):`, err);
-      alert(`Download failed. Please try again.`);
-    } finally {
-      setDownloading(prev => ({ ...prev, audio: false }));
-    }
-  };
-
-  const handleVideoDownload = async (youtubeId, directVideoUrl = null, trackTitle = 'video') => {
-    if (downloading.video) return;
-
-    if (directVideoUrl) {
-      setDownloading(prev => ({ ...prev, video: true }));
-      setDownloadDone(prev => ({ ...prev, video: false }));
-      try {
-        const response = await fetch(directVideoUrl);
-        if (!response.ok) throw new Error(`Download failed: ${response.statusText}`);
-        const blob = await response.blob();
-
-        const disposition = response.headers.get('Content-Disposition');
-        let downloadFilename;
-        if (disposition) {
-          const match = disposition.match(/filename="?([^";\n]+)"?/);
-          downloadFilename = match ? match[1] : null;
-        }
-        if (!downloadFilename) {
-          const safeName = trackTitle.replace(/[^\w\s-]/gi, '_').trim();
-          downloadFilename = `${safeName}.mp4`;
-        }
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = downloadFilename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-
-        setDownloadDone(prev => ({ ...prev, video: true }));
-        setTimeout(() => setDownloadDone(prev => ({ ...prev, video: false })), 3000);
-      } catch (err) {
-        console.error('Direct download error, opening link:', err);
-        window.open(directVideoUrl, '_blank');
-      } finally {
-        setDownloading(prev => ({ ...prev, video: false }));
-      }
-      return;
-    }
-
-    // Vercel doesn't support ffmpeg, so we redirect video downloads to a clean, ad-free external service (cobalt.tools)
-    const url = `https://www.youtube.com/watch?v=${youtubeId}`;
-    window.open(`https://cobalt.tools/?u=${encodeURIComponent(url)}`, '_blank');
-  };
 
   const tracks = [
     { num: 1, title: 'Jah Light in my Soul', credits: 'beat by Workdonebeatz sung by Arion', youtubeId: '-ImqIW1tJ1A', duration: '3:22' },
@@ -137,34 +35,14 @@ export default function PainAlbumSection({ initialContent }) {
 
   const totalDuration = '39:48';
 
-  // Map directly from our track list, with priority for direct high-quality videoUrl if present, fallback to backend
-  const getMediaForTrack = (title) => {
-    const track = tracks.find(t => t.title === title);
-    if (track && track.videoUrl) {
-      return { source: 'DIRECT', videoUrl: track.videoUrl, youtubeId: track.youtubeId };
-    }
-    if (track && track.youtubeId) {
-      return { source: 'YOUTUBE', youtubeId: track.youtubeId };
-    }
-    if (!initialContent?.media) return null;
-    return initialContent.media.find(m => m.title.toLowerCase().includes(title.toLowerCase().split(' ')[0]));
-  };
+  // YouTube-style player (expanded / mini / fullscreen) driven by this album's tracks
+  const [album] = useState(() => buildPainAlbum(tracks, API_BASE));
+  const player = usePlayer(album);
+  const activeTrack = player.track ? tracks[player.trackIndex] : null;
 
   const handlePlay = (track) => {
-    setActiveTrack(track);
+    player.actions.playTrack(tracks.findIndex(t => t.num === track.num));
   };
-
-  // Lock body scroll when modal is open to prevent double scrollbars
-  useEffect(() => {
-    if (activeTrack) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [activeTrack]);
 
   // Animated EQ bars for the playing track
   const EqBars = () => (
@@ -367,297 +245,17 @@ export default function PainAlbumSection({ initialContent }) {
         </div>
       </div>
 
-      {/* ======== Now Playing Modal ======== */}
-      <style>{`
-        @media (max-height: 600px) and (orientation: landscape) {
-          .mobile-landscape-full { 
-            width: 100% !important;
-            max-width: calc((100vh - 140px) * 1.777) !important;
-            height: auto !important;
-            max-height: calc(100vh - 140px) !important;
-            aspect-ratio: 16/9 !important;
-            border-radius: 8px !important;
-            margin: 0 auto !important;
-          }
-          .mobile-landscape-container {
-            padding-left: 16px !important;
-            padding-right: 16px !important;
-          }
-        }
-      `}</style>
-      <AnimatePresence>
-        {activeTrack && (
-          <motion.div
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-50 bg-[#030303] flex flex-col disable-select overflow-hidden"
-            onContextMenu={(e) => e.preventDefault()}
-          >
-            {/* Dynamic Ambient Background Glow */}
-            <div
-              className="absolute inset-0 z-0 opacity-30 scale-125 pointer-events-none"
-              style={{
-                backgroundImage: `url(https://img.youtube.com/vi/${activeTrack.youtubeId}/maxresdefault.jpg)`,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                filter: 'blur(100px) saturate(120%) brightness(0.6)',
-              }}
-            />
-            {/* Deep vignette overlay */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/40 via-[#030303]/70 to-[#030303] pointer-events-none" />
-            <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,#030303_75%)] pointer-events-none" />
-
-            {/* Content wrapper */}
-            <div className="relative z-10 flex flex-col h-full w-full">
-              {/* Floating Back Button for Mobile Landscape (visible only when screen height is small) */}
-              <button
-                onClick={() => setActiveTrack(null)}
-                className="absolute top-4 left-4 z-50 p-3 bg-black/50 hover:bg-black/80 backdrop-blur-md rounded-full text-white md:hidden hidden landscape:flex landscape:items-center landscape:justify-center border border-white/10"
-                style={{ '@media (min-height: 600px)': { display: 'none' } }}
-              >
-                <ChevronDown className="w-6 h-6 rotate-90" />
-              </button>
-
-              {/* Header (Sticky so it doesn't get lost when scrolling, hidden in strict mobile landscape) */}
-              <div className="sticky top-0 z-40 p-4 md:p-6 flex items-center justify-between shrink-0 landscape:max-h-[500px]:hidden bg-[#030303]/80 backdrop-blur-md border-b border-white/[0.02]">
-                <button onClick={() => setActiveTrack(null)} className="p-2 text-[#666] hover:text-white transition-colors duration-200">
-                  <ChevronDown className="w-7 h-7" />
-                </button>
-                <div className="text-[10px] font-bold tracking-[0.3em] text-[#555] uppercase">Now Playing from Album</div>
-                <div className="w-11" />
-              </div>
-
-              {/* Audio / Video Toggle (Hidden in strict mobile landscape) */}
-              <div className="flex justify-center mt-4 mb-4 md:mb-8 shrink-0 landscape:max-h-[500px]:hidden">
-                <div className="flex bg-white/[0.04] backdrop-blur-sm rounded-full p-1 gap-1 border border-white/[0.06]">
-                  <button
-                    onClick={() => setPlayerMode('audio')}
-                    className={`px-7 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${playerMode === 'audio'
-                        ? 'bg-white text-[#030303] shadow-[0_2px_12px_rgba(255,255,255,0.15)]'
-                        : 'text-[#666] hover:text-white/80'
-                      }`}
-                  >
-                    <Headphones className="w-3.5 h-3.5" />
-                    Audio
-                  </button>
-                  <button
-                    onClick={() => setPlayerMode('video')}
-                    className={`px-7 py-2 rounded-full text-sm font-semibold transition-all duration-300 flex items-center gap-2 ${playerMode === 'video'
-                        ? 'bg-white text-[#030303] shadow-[0_2px_12px_rgba(255,255,255,0.15)]'
-                        : 'text-[#666] hover:text-white/80'
-                      }`}
-                  >
-                    <Volume2 className="w-3.5 h-3.5" />
-                    Video
-                  </button>
-                </div>
-              </div>
-
-              {/* Player Area */}
-              <div className="flex-1 flex flex-col items-center justify-start px-4 md:px-6 pb-8 md:pb-12 max-w-6xl mx-auto w-full overflow-y-auto mobile-landscape-container">
-                <motion.div
-                  layout
-                  className={`w-full bg-black/60 rounded-2xl overflow-visible shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative transition-all duration-500 flex-shrink-0 mobile-landscape-full border border-white/[0.04] ${playerMode === 'audio' ? 'max-w-md aspect-square' : 'max-w-5xl aspect-video'
-                    }`}
-                >
-                  {(() => {
-                    const media = getMediaForTrack(activeTrack.title);
-                    const directVideoUrl = activeTrack.videoUrl || (media?.source === 'DIRECT' ? media.videoUrl : null);
-
-                    if (directVideoUrl) {
-                      if (playerMode === 'video') {
-                        return (
-                          <CustomVideoPlayer
-                            videoUrl={directVideoUrl}
-                            title={activeTrack.title}
-                          />
-                        );
-                      } else {
-                        return (
-                          <CustomVideoPlayer
-                            videoUrl={directVideoUrl}
-                            title={activeTrack.title}
-                            audioOnlyMode={true}
-                            coverNode={
-                              <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center relative">
-                                <div className="absolute top-[6%] text-[#0a0a0a] font-black text-[clamp(1.2rem,4vw,1.5rem)] tracking-tighter">TURNING</div>
-                                <div className="absolute top-[20%] text-[#0a0a0a] font-medium text-[clamp(0.8rem,3vw,1rem)]">MY</div>
-                                <div className="absolute top-[32%] text-[#0a0a0a] font-black text-[clamp(3rem,10vw,5rem)] tracking-tighter leading-none">PAIN</div>
-                                <div className="absolute top-[58%] text-[#0a0a0a] text-[clamp(1rem,4vw,1.5rem)] italic" style={{ fontFamily: 'Georgia, serif' }}>into</div>
-                                <div className="absolute bottom-[8%] text-[#0a0a0a] font-black text-[clamp(1.8rem,7vw,3rem)] tracking-tighter">PURPOSE</div>
-                                <svg className="absolute bottom-0 right-0 w-full h-full opacity-[0.06]" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                  <path d="M0 100 L100 0 L100 100 Z" fill="#0a0a0a" />
-                                </svg>
-                              </div>
-                            }
-                          />
-                        );
-                      }
-                    } else if (!media) {
-                      // Fallback to embedded players if backend hasn't supplied custom links yet
-                      if (playerMode === 'video') {
-                        return (
-                          <CustomVideoPlayer
-                            videoUrl={`https://www.youtube.com/watch?v=${activeTrack.youtubeId}`}
-                            title={activeTrack.title}
-                          />
-                        );
-                      } else {
-                        // Audio fallback
-                        return (
-                          <div className="w-full h-full relative group bg-[#050505]">
-                            {/* Art */}
-                            <img
-                              src={`https://img.youtube.com/vi/${activeTrack.youtubeId}/maxresdefault.jpg`}
-                              alt={activeTrack.title}
-                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-60 mix-blend-luminosity"
-                            />
-                            {/* Vignette */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
-
-                            {/* We use CustomVideoPlayer in audioOnlyMode to leverage the YouTube IFrame API for audio playback without showing the video */}
-                            <div className="absolute inset-0 z-10">
-                              <CustomVideoPlayer
-                                videoUrl={`https://www.youtube.com/watch?v=${activeTrack.youtubeId}`}
-                                title={activeTrack.title}
-                                audioOnlyMode={true}
-                              />
-                            </div>
-                          </div>
-                        );
-                      }
-                    } else if (media.source === 'YOUTUBE') {
-                      if (playerMode === 'video') {
-                        return (
-                          <CustomVideoPlayer
-                            videoUrl={`https://www.youtube.com/watch?v=${media.youtubeId}`}
-                            title={activeTrack.title}
-                          />
-                        );
-                      } else {
-                        return (
-                          <CustomVideoPlayer
-                            videoUrl={`https://www.youtube.com/watch?v=${media.youtubeId}`}
-                            title={activeTrack.title}
-                            audioOnlyMode={true}
-                            coverNode={
-                              <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center relative">
-                                <div className="absolute top-[6%] text-[#0a0a0a] font-black text-[clamp(1.2rem,4vw,1.5rem)] tracking-tighter">TURNING</div>
-                                <div className="absolute top-[20%] text-[#0a0a0a] font-medium text-[clamp(0.8rem,3vw,1rem)]">MY</div>
-                                <div className="absolute top-[32%] text-[#0a0a0a] font-black text-[clamp(3rem,10vw,5rem)] tracking-tighter leading-none">PAIN</div>
-                                <div className="absolute top-[58%] text-[#0a0a0a] text-[clamp(1rem,4vw,1.5rem)] italic" style={{ fontFamily: 'Georgia, serif' }}>into</div>
-                                <div className="absolute bottom-[8%] text-[#0a0a0a] font-black text-[clamp(1.8rem,7vw,3rem)] tracking-tighter">PURPOSE</div>
-                                <svg className="absolute bottom-0 right-0 w-full h-full opacity-[0.06]" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                  <path d="M0 100 L100 0 L100 100 Z" fill="#0a0a0a" />
-                                </svg>
-                              </div>
-                            }
-                          />
-                        );
-                      }
-                    } else if (media && (media.playUrl || media.url)) {
-                      if (playerMode === 'video') {
-                        return <div className="w-full h-full flex items-center justify-center text-[#555] text-sm">No video available for this track</div>;
-                      }
-                      return (
-                        <div className="w-full h-full relative">
-                          <div className="absolute inset-0 z-0">
-                            <div className="w-full h-full bg-[#f5f5f5] flex flex-col items-center justify-center p-4 text-center relative">
-                              <div className="absolute top-[6%] text-[#0a0a0a] font-black text-[clamp(1.2rem,4vw,1.5rem)] tracking-tighter">TURNING</div>
-                              <div className="absolute top-[20%] text-[#0a0a0a] font-medium text-[clamp(0.8rem,3vw,1rem)]">MY</div>
-                              <div className="absolute top-[32%] text-[#0a0a0a] font-black text-[clamp(3rem,10vw,5rem)] tracking-tighter leading-none">PAIN</div>
-                              <div className="absolute top-[58%] text-[#0a0a0a] text-[clamp(1rem,4vw,1.5rem)] italic" style={{ fontFamily: 'Georgia, serif' }}>into</div>
-                              <div className="absolute bottom-[8%] text-[#0a0a0a] font-black text-[clamp(1.8rem,7vw,3rem)] tracking-tighter">PURPOSE</div>
-                            </div>
-                          </div>
-                          <div className="absolute bottom-0 left-0 right-0 z-10 bg-black/80 backdrop-blur-sm p-2">
-                            <CustomAudioPlayer src={media.playUrl || media.url} title={activeTrack.title} />
-                          </div>
-                        </div>
-                      );
-                    } else {
-                      return (
-                        <div className="w-full h-full flex items-center justify-center text-sm text-[#555] italic">
-                          Media source linked from backend will play here. (Track: {activeTrack.title})
-                        </div>
-                      );
-                    }
-                  })()}
-                </motion.div>
-
-                {/* Track Info Below Player */}
-                <div className={`w-full mt-6 md:mt-10 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-500 ${playerMode === 'audio' ? 'max-w-md' : 'max-w-5xl'
-                  }`}>
-                  <div className="flex flex-col items-start">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-1.5 tracking-tight">{activeTrack.title}</h2>
-                    <p className="text-base text-[#777]">{activeTrack.credits}</p>
-                  </div>
-                  <div className="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                    {/* Audio Download */}
-                    <button
-                      onClick={() => {
-                        const media = initialContent?.media?.find(m =>
-                          m.title?.toLowerCase() === activeTrack.title.toLowerCase() || m.youtubeId === activeTrack.youtubeId
-                        );
-                        // If backend provides an audio type URL, or a general URL that we know is a file
-                        const directUrl = media?.type === 'audio' ? (media.playUrl || media.url) : null;
-                        handleDownload(activeTrack.youtubeId, activeTrack.title, directUrl);
-                      }}
-                      disabled={downloading.audio}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 border ${downloadDone.audio
-                          ? 'bg-green-500/10 border-green-500/30 text-green-400'
-                          : downloading.audio
-                            ? 'bg-white/[0.03] border-white/[0.08] text-[#888] cursor-wait'
-                            : 'bg-white/[0.04] border-white/[0.08] text-[#aaa] hover:bg-white/[0.08] hover:border-[#ff6b35]/30 hover:text-white active:scale-95'
-                        }`}
-                    >
-                      {downloadDone.audio ? (
-                        <Check className="w-4 h-4" />
-                      ) : downloading.audio ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Download className="w-4 h-4" />
-                      )}
-                      <span className="hidden sm:inline">{downloading.audio ? 'Preparing...' : downloadDone.audio ? 'Done!' : 'Audio'}</span>
-                      <span className="sm:hidden">{downloading.audio ? '...' : downloadDone.audio ? '✓' : 'MP3'}</span>
-                    </button>
-
-                    {/* Video Download */}
-                    <button
-                      onClick={() => {
-                        const media = initialContent?.media?.find(m =>
-                          m.title?.toLowerCase() === activeTrack.title.toLowerCase() || m.youtubeId === activeTrack.youtubeId
-                        );
-                        const directUrl = activeTrack.videoUrl || (media?.type === 'video' ? (media.playUrl || media.url) : null);
-                        handleVideoDownload(activeTrack.youtubeId, directUrl, activeTrack.title);
-                      }}
-                      disabled={downloading.video}
-                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all duration-300 border ${downloadDone.video
-                          ? 'bg-green-500/10 border-green-500/30 text-green-400'
-                          : downloading.video
-                            ? 'bg-white/[0.03] border-white/[0.08] text-[#888] cursor-wait'
-                            : 'bg-white/[0.04] border-white/[0.08] text-[#aaa] hover:bg-white/[0.08] hover:border-[#ff6b35]/30 hover:text-white active:scale-95'
-                        }`}
-                    >
-                      {downloadDone.video ? (
-                        <Check className="w-4 h-4" />
-                      ) : downloading.video ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Download className="w-4 h-4" />
-                      )}
-                      <span className="hidden sm:inline">{downloading.video ? 'Downloading...' : downloadDone.video ? 'Done!' : 'Video'}</span>
-                      <span className="sm:hidden">{downloading.video ? '...' : downloadDone.video ? '✓' : 'MP4'}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* ======== Now Playing (YouTube-style player) ======== */}
+      {createPortal(
+        <div style={{ '--accent': album.accent }}>
+          <AnimatePresence>
+            {player.view !== 'closed' && player.track && (
+              <AlbumPlayer key="player" player={player} />
+            )}
+          </AnimatePresence>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
