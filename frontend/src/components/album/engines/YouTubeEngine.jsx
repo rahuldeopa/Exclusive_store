@@ -80,6 +80,20 @@ const YouTubeEngine = forwardRef(function YouTubeEngine(
     getElement: () => null,
   }));
 
+  // cc_load_policy=0 is only a hint: YouTube still turns captions on when the
+  // uploader or the viewer's account defaults to them, and again for every new
+  // video. Unload the captions module whenever it appears.
+  const hideCaptions = () => {
+    const p = playerRef.current;
+    if (!p?.unloadModule) return;
+    try {
+      p.unloadModule('captions');
+      p.unloadModule('cc');
+    } catch {
+      // module not loaded
+    }
+  };
+
   const applyAudio = () => {
     const p = playerRef.current;
     if (!p || !readyRef.current) return;
@@ -131,12 +145,14 @@ const YouTubeEngine = forwardRef(function YouTubeEngine(
               if (cancelled) return;
               readyRef.current = true;
               applyAudio();
+              hideCaptions();
               loadVideo(videoIdRef.current);
             },
             onStateChange: ({ data }) => {
               stateRef.current = data;
               switch (data) {
                 case STATE.PLAYING:
+                  hideCaptions();
                   clearTimeout(gestureTimerRef.current);
                   emit('onNeedsGesture', false);
                   emit('onPlay');
@@ -160,6 +176,8 @@ const YouTubeEngine = forwardRef(function YouTubeEngine(
                   break;
               }
             },
+            // Fired when a module (e.g. captions) loads for the current video.
+            onApiChange: hideCaptions,
             onError: ({ data }) => emit('onError', `youtube error ${data}`),
           },
         });
