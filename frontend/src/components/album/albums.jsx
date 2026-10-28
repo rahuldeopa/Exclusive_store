@@ -26,8 +26,11 @@ function createPrefetcher(urlFor) {
 export function buildLoveAlbum(tracks, apiBase) {
   const proxy = (id, confirm = false) =>
     `${apiBase}/api/download/drive-audio?id=${encodeURIComponent(id)}${confirm ? '&confirm=t' : ''}`;
+  // Served straight from Google Drive to the viewer's browser (no backend hop).
+  const direct = (id) => `https://drive.usercontent.google.com/download?id=${encodeURIComponent(id)}&export=download&confirm=t`;
   // Track 3 has no separate audio master: its audio is streamed from the video file.
   const audioUrl = (t) => (t.audioId ? proxy(t.audioId) : proxy(t.videoId, true));
+  const audioFileId = (t) => t.audioId || t.videoId;
 
   return {
     id: 'love-is-blind-2026',
@@ -45,12 +48,16 @@ export function buildLoveAlbum(tracks, apiBase) {
       duration: parseDuration(t.duration),
       audioId: t.audioId,
       thumbnail: t.videoId ? `https://drive.google.com/thumbnail?id=${t.videoId}&sz=w640` : undefined,
-      audio: [{ type: 'html5', src: audioUrl(t) }],
+      // Try Drive directly first, then our backend proxy. Both play in our own player.
+      audio: [
+        { type: 'html5', src: direct(audioFileId(t)), timeout: 15000 },
+        { type: 'html5', src: audioUrl(t) },
+      ],
       video: t.videoId
         ? [
-          // Streamed through the backend so we get a real <video> with our own controls…
-          { type: 'html5', src: proxy(t.videoId, true), timeout: 25000 },
-          // …falling back to Google Drive's own embed if that fails.
+          { type: 'html5', src: direct(t.videoId), timeout: 15000 },
+          { type: 'html5', src: proxy(t.videoId, true), timeout: 20000 },
+          // Last resort: Google Drive's own embed (its own controls, not ours).
           { type: 'iframe', src: `https://drive.google.com/file/d/${t.videoId}/preview` },
         ]
         : [],
@@ -67,7 +74,7 @@ export function buildLoveAlbum(tracks, apiBase) {
           : []),
       ],
     })),
-    prefetch: createPrefetcher((t) => `${t.audio[0].src}&prefetch=true`),
+    prefetch: createPrefetcher((t) => `${audioUrl(t)}&prefetch=true`),
   };
 }
 

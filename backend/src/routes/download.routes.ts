@@ -154,6 +154,8 @@ if (!fs.existsSync(AUDIO_CACHE_DIR)) {
   fs.mkdirSync(AUDIO_CACHE_DIR, { recursive: true });
 }
 
+const isHtml = (contentType?: string | null) => Boolean(contentType && contentType.includes('text/html'));
+
 // Track in-progress downloads to prevent duplicate concurrent network fetches
 const activeDownloads = new Map<string, Promise<boolean>>();
 
@@ -191,6 +193,12 @@ async function cacheAudioFile(id: string, confirmParam: string): Promise<boolean
       }
 
       const contentType = driveRes.headers.get('content-type') || 'audio/wav';
+      if (isHtml(contentType)) {
+        // Drive sent a warning / quota / sign-in page instead of the file: never cache it.
+        console.error(`[Audio Cache] Drive returned an HTML page for ${id}, not caching`);
+        await driveRes.body.cancel().catch(() => {});
+        return false;
+      }
       const contentLengthHeader = driveRes.headers.get('content-length');
       const expectedLength = contentLengthHeader ? parseInt(contentLengthHeader, 10) : 0;
 
@@ -255,7 +263,11 @@ router.get('/drive-audio', async (req, res) => {
     try {
       meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
       const stat = fs.statSync(dataFile);
-      if (meta.contentLength && stat.size === meta.contentLength && stat.size > 0) {
+      if (isHtml(meta.contentType)) {
+        // Purge pages cached before HTML responses were rejected.
+        fs.rmSync(dataFile, { force: true });
+        fs.rmSync(metaFile, { force: true });
+      } else if (meta.contentLength && stat.size === meta.contentLength && stat.size > 0) {
         isCached = true;
       }
     } catch {
@@ -334,6 +346,11 @@ router.get('/drive-audio', async (req, res) => {
     res.setHeader('X-Cache-Status', 'MISS');
 
     const contentType = driveRes.headers.get('content-type') || 'audio/wav';
+    if (isHtml(contentType)) {
+      await driveRes.body?.cancel().catch(() => {});
+      res.status(502).json({ error: 'Google Drive did not return the media file' });
+      return;
+    }
     res.setHeader('Content-Type', contentType);
 
     const contentLength = driveRes.headers.get('content-length');

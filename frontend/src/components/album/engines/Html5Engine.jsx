@@ -72,7 +72,11 @@ const Html5Engine = forwardRef(function Html5Engine(
         emit('onNeedsGesture', false);
         emit('onPlaying');
       },
-      pause: () => emit('onPause'),
+      // A failing source also fires "pause"; that isn't the user pausing, so don't
+      // let it cancel autoplay of the fallback source.
+      pause: () => {
+        if (!el.error) emit('onPause');
+      },
       waiting: () => emit('onWaiting'),
       stalled: () => emit('onWaiting'),
       canplay: () => emit('onCanPlay'),
