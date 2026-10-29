@@ -15,6 +15,6 @@ export async function connectDB() {
     console.log('Database connected');
   } catch (error) {
     console.error('Database connection error:', error);
-    process.exit(1);
+    // In serverless environments, avoid process.exit so non-DB endpoints (/health, /api/download) keep running
   }
 }

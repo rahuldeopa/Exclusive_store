@@ -14,9 +14,23 @@ import { env } from './config/env';
 const app = express();
 
 app.use(cors({
-  origin: env.FRONTEND_URL,
+  origin: (origin, callback) => {
+    // allow requests without origin (curl, direct browser audio/video streaming tags)
+    if (!origin) return callback(null, true);
+    if (
+      origin === env.FRONTEND_URL ||
+      origin.includes('localhost') ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('rahuldeopa.dev')
+    ) {
+      return callback(null, true);
+    }
+    // Allow all other origins for public client access
+    return callback(null, true);
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Range'],
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length', 'Content-Disposition'],
   credentials: true,
 }));
 app.use(express.json());

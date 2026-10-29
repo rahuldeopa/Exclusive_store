@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 const router = Router();
 
@@ -148,10 +149,16 @@ router.get('/stream', async (req, res) => {
 
 /**
  * Audio Cache Directory Setup
+ * Note: Uses os.tmpdir() to remain writable in serverless environments (Vercel/AWS Lambda)
+ * where the application root (process.cwd()) is read-only (EROFS).
  */
-const AUDIO_CACHE_DIR = path.join(process.cwd(), 'cache', 'audio');
-if (!fs.existsSync(AUDIO_CACHE_DIR)) {
-  fs.mkdirSync(AUDIO_CACHE_DIR, { recursive: true });
+const AUDIO_CACHE_DIR = path.join(os.tmpdir(), 'cache', 'audio');
+try {
+  if (!fs.existsSync(AUDIO_CACHE_DIR)) {
+    fs.mkdirSync(AUDIO_CACHE_DIR, { recursive: true });
+  }
+} catch (err) {
+  console.warn('[Audio Cache] Warning: could not initialize cache directory:', err);
 }
 
 const isHtml = (contentType?: string | null) => Boolean(contentType && contentType.includes('text/html'));
