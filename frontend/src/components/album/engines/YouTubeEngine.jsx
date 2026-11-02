@@ -24,7 +24,32 @@ function loadYouTubeApi() {
   return apiPromise;
 }
 
-const STATE = { UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 };
+let warmedUp = false;
+
+/**
+ * Downloads YouTube's player code ahead of time so the first track starts sooner.
+ * A throwaway embed fills the browser cache; the real player is created on play.
+ */
+export function warmUpYouTube(videoId) {
+  if (warmedUp || !videoId) return;
+  warmedUp = true;
+  if (navigator.connection?.saveData) return;
+
+  loadYouTubeApi().catch(() => {});
+
+  const frame = document.createElement('iframe');
+  frame.src = `https://www.youtube.com/embed/${encodeURIComponent(videoId)}?controls=0`;
+  frame.title = 'YouTube player warm-up';
+  frame.tabIndex = -1;
+  frame.setAttribute('aria-hidden', 'true');
+  frame.style.cssText = 'position:fixed;left:-9999px;top:0;width:320px;height:180px;border:0;';
+  const cleanup = () => frame.remove();
+  frame.addEventListener('load', cleanup, { once: true });
+  setTimeout(cleanup, 10000);
+  document.body.appendChild(frame);
+}
+
+const STATE ={ UNSTARTED: -1, ENDED: 0, PLAYING: 1, PAUSED: 2, BUFFERING: 3, CUED: 5 };
 
 /**
  * YouTube IFrame player driven entirely by our own controls (controls=0).

@@ -104,7 +104,11 @@ export function PainCover() {
   );
 }
 
-export function buildPainAlbum(tracks, apiBase) {
+export function buildPainAlbum(tracks) {
+  // Drive refuses to serve files to <audio>/<video> on other sites, so these only
+  // work as downloads. The browser saves them directly and shows its own progress.
+  const driveDownload = (id) => `https://drive.usercontent.google.com/download?id=${encodeURIComponent(id)}&export=download&confirm=t`;
+
   return {
     id: 'turning-my-pain-into-purpose',
     title: 'Turning My Pain into Purpose',
@@ -122,27 +126,10 @@ export function buildPainAlbum(tracks, apiBase) {
       thumbnail: youtubeThumb(t.youtubeId),
       sessionArtwork: youtubeThumb(t.youtubeId),
       audio: [{ type: 'youtube', id: t.youtubeId }],
-      // A direct high-quality file is preferred when available, with YouTube as fallback.
-      video: t.videoUrl
-        ? [{ type: 'html5', src: t.videoUrl, timeout: 15000 }, { type: 'youtube', id: t.youtubeId }]
-        : [{ type: 'youtube', id: t.youtubeId }],
+      video: [{ type: 'youtube', id: t.youtubeId }],
       downloads: [
-        {
-          key: 'audio',
-          label: 'Audio',
-          href: `${apiBase}/api/download/youtube?id=${encodeURIComponent(t.youtubeId)}&type=audio`,
-          filename: `${safeFileName(t.title)}_audio.m4a`,
-          strategy: 'blob',
-        },
-        t.videoUrl
-          ? { key: 'video', label: 'Video', href: t.videoUrl, filename: `${safeFileName(t.title)}.mp4`, strategy: 'blob', fallbackHref: t.videoUrl }
-          : {
-            key: 'video',
-            label: 'Video',
-            // Video muxing needs ffmpeg, which the API host doesn't have; use cobalt instead.
-            href: `https://cobalt.tools/?u=${encodeURIComponent(`https://www.youtube.com/watch?v=${t.youtubeId}`)}`,
-            strategy: 'external',
-          },
+        { key: 'audio', label: 'Audio', href: driveDownload(t.driveAudioId), filename: `${safeFileName(t.title)}.m4a`, strategy: 'link' },
+        { key: 'video', label: 'Video', href: driveDownload(t.driveVideoId), filename: `${safeFileName(t.title)}.mp4`, strategy: 'link' },
       ],
     })),
   };

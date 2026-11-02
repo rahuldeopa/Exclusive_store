@@ -109,7 +109,7 @@ export function ModeSwitch({ player, className, size = 'md' }) {
 }
 
 /** Per-track download buttons with preparing / done feedback. */
-export function DownloadButtons({ track, compact = false }) {
+export function DownloadButtons({ track, compact = false, dense = false }) {
   const [state, setState] = useState({});
   if (!track?.downloads?.length) return null;
 
@@ -137,8 +137,8 @@ export function DownloadButtons({ track, compact = false }) {
         onClick={() => start(item)}
         disabled={st === 'busy'}
         className={cx(
-          'shrink-0 inline-flex items-center gap-2 h-9 rounded-full border text-[13px] font-semibold transition-colors',
-          compact ? 'px-3' : 'px-4',
+          'shrink-0 inline-flex items-center rounded-full border font-semibold transition-colors',
+          dense ? 'gap-1 h-7 px-2.5 text-[11px]' : cx('gap-2 h-9 text-[13px]', compact ? 'px-3' : 'px-4'),
           st === 'done'
             ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
             : st === 'error'
@@ -148,11 +148,11 @@ export function DownloadButtons({ track, compact = false }) {
         aria-label={`Download ${item.label}`}
       >
         {st === 'busy' ? (
-          <Loader2 className="w-4 h-4 animate-spin" />
+          <Loader2 className={cx(dense ? 'w-3 h-3' : 'w-4 h-4', 'animate-spin')} />
         ) : st === 'done' ? (
-          <Check className="w-4 h-4" />
+          <Check className={dense ? 'w-3 h-3' : 'w-4 h-4'} />
         ) : (
-          <Download className="w-4 h-4" />
+          <Download className={dense ? 'w-3 h-3' : 'w-4 h-4'} />
         )}
         <span>{st === 'busy' ? 'Preparing…' : st === 'done' ? 'Started' : st === 'error' ? 'Failed' : item.label}</span>
       </button>

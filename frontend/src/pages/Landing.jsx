@@ -213,7 +213,7 @@ export default function Landing() {
 
             {/* Experience Dispatcher */}
             {passcode?.toUpperCase() === 'PAIN' ? (
-              <PainAlbumSection initialContent={mediaContent} />
+              <PainAlbumSection initialContent={mediaContent} passcode={passcode} />
             ) : isLoveAlbum ? (
               <LoveAlbumSection initialContent={mediaContent} passcode={passcode} />
             ) : mediaContent?.type === 'AUDIOBOOK' ? (
